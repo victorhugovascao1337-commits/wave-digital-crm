@@ -247,7 +247,7 @@ export default function InsightsPage() {
   return (
     <CRMLayout>
       {/* Header with month filter and export */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Relatórios</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -298,7 +298,7 @@ export default function InsightsPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <Card className="p-4 bg-primary">
           <p className="text-xs font-medium mb-1 uppercase text-primary-foreground/80">
             RECEITA — {MONTH_SHORT[selectedMonth].toUpperCase()}
@@ -345,7 +345,7 @@ export default function InsightsPage() {
       )}
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
         {/* Monthly Revenue */}
         <Card className="p-6">
           <h2 className="font-semibold text-foreground mb-4">Receita Mensal (R$)</h2>

@@ -95,29 +95,30 @@ export default function PacientesPage() {
     <CRMLayout>
       <div className="px-4 py-6">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-end">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
               Pacientes
             </h2>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Gerencie o histórico e o atendimento de sua base clínica.
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-muted-foreground font-medium border border-border rounded-xl hover:bg-accent transition-all"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white text-muted-foreground font-medium border border-border rounded-xl hover:bg-accent transition-all text-sm"
             >
               <Download className="h-4 w-4" />
               Exportar
             </button>
             <button
               onClick={() => setNewPatientModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+              className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform text-sm"
             >
               <Plus className="h-4 w-4" />
-              Novo Paciente
+              <span className="hidden sm:inline">Novo Paciente</span>
+              <span className="sm:hidden">Novo</span>
             </button>
           </div>
         </div>

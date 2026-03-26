@@ -276,7 +276,7 @@ export function PaymentList() {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <Card className="p-6 bg-primary">
           <p className="text-xs font-medium mb-2 uppercase text-primary-foreground/80">
             FATURAMENTO DO MÊS
@@ -315,16 +315,16 @@ export function PaymentList() {
 
       {/* Payments Table */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h2 className="font-semibold text-foreground">Todos os Pagamentos</h2>
           <div className="flex items-center gap-2">
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-64"
+                className="pl-9 w-full sm:w-64"
               />
             </div>
             <DropdownMenu>

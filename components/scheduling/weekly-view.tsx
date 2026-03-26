@@ -86,7 +86,7 @@ export function WeeklyView({
   }, [appointments, weekDays])
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-x-auto">
       {/* Week header */}
       <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b bg-background sticky top-0 z-10">
         <div className="py-3" />

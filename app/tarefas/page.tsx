@@ -328,7 +328,7 @@ export default function TarefasPage() {
 
         {/* Board View */}
         {view === "board" && (
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {(["todo", "in_progress", "completed", "overdue"] as const).map((status) => {
               const cfg = statusConfig[status]
               const columnTasks = filtered.filter((t) => t.status === status)
@@ -408,7 +408,7 @@ export default function TarefasPage() {
                 placeholder="Descrição opcional..."
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Status</Label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
@@ -433,7 +433,7 @@ export default function TarefasPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Responsável</Label>
                 <Input
@@ -451,7 +451,7 @@ export default function TarefasPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Relacionado a</Label>
                 <Input
