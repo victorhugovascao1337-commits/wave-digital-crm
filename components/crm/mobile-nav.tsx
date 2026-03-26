@@ -52,7 +52,7 @@ export function MobileNav() {
 
       {/* More menu popup */}
       {moreOpen && moreTabs.length > 0 && (
-        <div className="lg:hidden fixed bottom-[68px] right-2 z-50 bg-white rounded-2xl shadow-2xl border border-border/50 py-2 w-48 mb-[env(safe-area-inset-bottom)]">
+        <div className="lg:hidden fixed bottom-[68px] right-2 z-[1000] bg-white rounded-2xl shadow-2xl border border-border/50 py-2 w-48 mb-[env(safe-area-inset-bottom)]">
           {moreTabs.map((tab) => {
             const isActive = pathname === tab.href
             return (
@@ -74,7 +74,7 @@ export function MobileNav() {
       )}
 
       {/* Bottom bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border/40 px-1 pb-[env(safe-area-inset-bottom)]">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[999] bg-white border-t border-border/40 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-around h-[60px]">
           {mainTabs.map((tab) => {
             const isActive = pathname === tab.href
