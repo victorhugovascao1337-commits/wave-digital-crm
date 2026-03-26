@@ -16,7 +16,7 @@ export function CRMLayout({ children }: CRMLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Sidebar
         onNovaConsulta={() => setNovaConsultaOpen(true)}
         mobileOpen={mobileOpen}
@@ -32,7 +32,8 @@ export function CRMLayout({ children }: CRMLayoutProps) {
       {/* Mobile floating action button */}
       <button
         onClick={() => setNovaConsultaOpen(true)}
-        className="lg:hidden fixed bottom-[76px] right-4 z-[998] w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 transition-transform"
+        className="lg:hidden fixed bottom-[76px] z-[998] w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 transition-transform"
+        style={{ right: '16px' }}
       >
         <Plus className="h-6 w-6" />
       </button>

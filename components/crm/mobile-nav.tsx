@@ -74,7 +74,7 @@ export function MobileNav() {
       )}
 
       {/* Bottom bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[999] bg-white border-t border-border/40 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+      <nav className="lg:hidden fixed bottom-0 left-0 z-[999] w-screen bg-white border-t border-border/40 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-around h-[60px]">
           {mainTabs.map((tab) => {
             const isActive = pathname === tab.href
