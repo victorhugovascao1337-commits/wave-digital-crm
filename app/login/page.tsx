@@ -49,10 +49,10 @@ export default function LoginPage() {
               className="h-16 mx-auto mb-4"
             />
             <h2 className="mt-3 text-lg font-medium text-foreground/80">
-              Bem-vindo ao futuro da gestão de fisioterapia
+              Bem-vindo ao Wave Digital
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Acesse sua conta para gerenciar seus pacientes e evoluções.
+              Acesse sua conta para gerenciar sua clínica.
             </p>
           </div>
 
@@ -88,12 +88,14 @@ export default function LoginPage() {
                   <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Senha
                   </Label>
-                  <button
-                    type="button"
+                  <a
+                    href="https://wa.me/5521969907980?text=Ol%C3%A1%2C%20esqueci%20minha%20senha%20e%20preciso%20de%20ajuda"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-xs text-primary hover:text-primary/80 font-medium"
                   >
                     Esqueceu?
-                  </button>
+                  </a>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -139,9 +141,14 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
                 Ainda não tem uma conta?{" "}
-                <button className="text-primary hover:text-primary/80 font-semibold">
+                <a
+                  href="https://wa.me/5521969907980?text=Ol%C3%A1%2C%20quero%20experimentar%20gr%C3%A1tis%20o%20Wave%20Digital"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:text-primary/80 font-semibold"
+                >
                   Experimentar Grátis
-                </button>
+                </a>
               </p>
             </div>
           </div>
@@ -151,7 +158,7 @@ export default function LoginPage() {
       {/* Footer */}
       <footer className="py-6 text-center text-xs text-muted-foreground border-t border-border/30">
         <div className="flex items-center justify-center gap-6">
-          <span>&copy; 2024 Wave Digital CRM. All rights reserved.</span>
+          <span>&copy; 2025 Wave Digital. Todos os direitos reservados.</span>
           <button className="hover:text-foreground">Privacy Policy</button>
           <button className="hover:text-foreground">Terms of Service</button>
           <button className="hover:text-foreground">Contact Support</button>
