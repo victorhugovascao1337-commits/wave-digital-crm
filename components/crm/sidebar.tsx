@@ -31,7 +31,6 @@ const navItems = [
   { href: "/tarefas", label: "Tarefas", icon: ClipboardList, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/insights", label: "Relatórios", icon: TrendingUp, roles: ["admin", "superadmin", "doctor"] },
   { href: "/usuarios", label: "Usuários", icon: UserCog, roles: ["admin", "superadmin"] },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, roles: ["admin", "superadmin"] },
 ]
 
 interface SidebarProps {
@@ -122,13 +121,15 @@ export function Sidebar({ onNovaConsulta, mobileOpen, onMobileClose }: SidebarPr
           Novo Agendamento
         </button>
         <div className="pt-3 border-t border-border/50">
-          <Link
-            href="#"
+          <a
+            href="https://wa.me/5521969907980?text=Ol%C3%A1%2C%20sou%20um%20cliente%20e%20preciso%20de%20ajuda"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-primary transition-colors text-sm"
           >
             <HelpCircle className="h-4 w-4" />
             <span>Suporte</span>
-          </Link>
+          </a>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-destructive transition-colors text-sm w-full"

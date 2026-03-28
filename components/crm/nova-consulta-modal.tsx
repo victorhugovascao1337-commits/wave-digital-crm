@@ -114,7 +114,7 @@ export function NovaConsultaModal({ open, onOpenChange, onSuccess }: NovaConsult
           service: formData.servico,
           amount: parseFloat(formData.valor) || 0,
           notes: formData.observacoes || null,
-          status: "scheduled",
+          status: "PENDENTE",
         }),
       })
 

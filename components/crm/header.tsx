@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Bell, AlertTriangle, Menu } from "lucide-react"
+import { Search, Bell, AlertTriangle, Menu, Settings, LogOut, User } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { createClient } from "@/lib/supabase/client"
 import { CLINIC_TYPE_LABELS } from "@/lib/types"
 
 interface HeaderProps {
@@ -15,6 +16,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   const [pendingAmount, setPendingAmount] = useState(0)
   const [adminMessages, setAdminMessages] = useState<{ id: string; title: string; message: string; type: string }[]>([])
   const [showMessages, setShowMessages] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -133,23 +135,61 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
           )}
         </div>
 
-        {/* Avatar */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-foreground">{displayName}</p>
-            <p className="text-[11px] text-muted-foreground">
-              {CLINIC_TYPE_LABELS[user?.clinicType || "fisioterapia"] || "Profissional"}
-            </p>
-          </div>
-          <Avatar className="h-9 w-9 sm:h-10 sm:w-10 border-2 border-white shadow-sm">
-            {user?.logoUrl ? (
-              <img src={user.logoUrl} alt="" className="h-full w-full object-cover rounded-full" />
-            ) : (
-              <AvatarFallback className="bg-primary text-white text-xs sm:text-sm font-bold">
-                {initials}
-              </AvatarFallback>
-            )}
-          </Avatar>
+        {/* Avatar with dropdown */}
+        <div className="relative">
+          <button
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer"
+            onClick={() => { setShowUserMenu(!showUserMenu); setShowMessages(false) }}
+          >
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-semibold text-foreground">{displayName}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {CLINIC_TYPE_LABELS[user?.clinicType || "fisioterapia"] || "Profissional"}
+              </p>
+            </div>
+            <Avatar className="h-9 w-9 sm:h-10 sm:w-10 border-2 border-white shadow-sm">
+              {user?.logoUrl ? (
+                <img src={user.logoUrl} alt="" className="h-full w-full object-cover rounded-full" />
+              ) : (
+                <AvatarFallback className="bg-primary text-white text-xs sm:text-sm font-bold">
+                  {initials}
+                </AvatarFallback>
+              )}
+            </Avatar>
+          </button>
+          {showUserMenu && (
+            <div className="absolute right-0 top-12 w-56 bg-white rounded-xl border shadow-2xl z-50 overflow-hidden">
+              <div className="px-4 py-3 border-b bg-accent/30">
+                <p className="text-sm font-semibold">{displayName}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => { setShowUserMenu(false); router.push("/perfil") }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent/50 flex items-center gap-3 transition-colors"
+                >
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  Meu Perfil
+                </button>
+              </div>
+              <div className="border-t py-1">
+                <button
+                  onClick={async () => {
+                    setShowUserMenu(false)
+                    sessionStorage.clear()
+                    const supabase = createClient()
+                    await supabase.auth.signOut()
+                    router.push("/login")
+                    router.refresh()
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
