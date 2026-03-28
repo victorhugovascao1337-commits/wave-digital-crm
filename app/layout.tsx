@@ -7,25 +7,17 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Wave CRM - Fisioterapia Especializada',
-  description: 'Sistema de gestão para clínicas de fisioterapia',
-  generator: 'v0.app',
+  title: 'Wave Digital - Gestão Clínica',
+  description: 'Sistema completo de gestão para clínicas. Gerencie pacientes, consultas, pagamentos e muito mais.',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
+    icon: '/favicon.png',
     apple: '/apple-icon.png',
+  },
+  openGraph: {
+    title: 'Wave Digital - Gestão Clínica',
+    description: 'Sistema completo de gestão para clínicas. Gerencie pacientes, consultas, pagamentos e muito mais.',
+    siteName: 'Wave Digital',
+    type: 'website',
   },
 }
 
