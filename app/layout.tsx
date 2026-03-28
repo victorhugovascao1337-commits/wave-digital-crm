@@ -10,7 +10,10 @@ export const metadata: Metadata = {
   title: 'Wave Digital - Gestão Clínica',
   description: 'Sistema completo de gestão para clínicas. Gerencie pacientes, consultas, pagamentos e muito mais.',
   icons: {
-    icon: '/favicon.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
     apple: '/apple-icon.png',
   },
   openGraph: {
