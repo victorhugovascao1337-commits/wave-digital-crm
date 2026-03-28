@@ -6,16 +6,15 @@ export async function GET() {
   const supabase = await createClient()
   const clinicId = await getClinicId()
 
-  let query = supabase
-    .from("patients")
-    .select("*")
-    .order("name", { ascending: true })
-
-  if (clinicId) {
-    query = query.eq("clinic_id", clinicId)
+  if (!clinicId) {
+    return NextResponse.json([])
   }
 
-  const { data: patients, error } = await query
+  const { data: patients, error } = await supabase
+    .from("patients")
+    .select("*")
+    .eq("clinic_id", clinicId)
+    .order("name", { ascending: true })
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

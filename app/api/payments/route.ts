@@ -6,7 +6,11 @@ export async function GET() {
   const supabase = await createClient()
   const clinicId = await getClinicId()
 
-  let query = supabase
+  if (!clinicId) {
+    return NextResponse.json([])
+  }
+
+  const { data: payments, error } = await supabase
     .from("payments")
     .select(`
       *,
@@ -18,13 +22,8 @@ export async function GET() {
         phone
       )
     `)
+    .eq("clinic_id", clinicId)
     .order("due_date", { ascending: false })
-
-  if (clinicId) {
-    query = query.eq("clinic_id", clinicId)
-  }
-
-  const { data: payments, error } = await query
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

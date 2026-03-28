@@ -11,11 +11,15 @@ export async function GET() {
   const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
   const today = now.toISOString().split('T')[0]
 
-  // Helper to add clinic filter
-  const withClinic = (query: any) => {
-    if (clinicId) return query.eq("clinic_id", clinicId)
-    return query
+  if (!clinicId) {
+    return NextResponse.json({
+      monthlyRevenue: 0, pendingTotal: 0, overdueTotal: 0,
+      activePatients: 0, todayAppointments: 0, pendingPayments: 0,
+    })
   }
+
+  // Helper to add clinic filter
+  const withClinic = (query: any) => query.eq("clinic_id", clinicId)
 
   // Get monthly revenue (paid payments this month)
   const { data: paidPayments } = await withClinic(

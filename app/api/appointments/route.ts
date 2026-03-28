@@ -9,15 +9,16 @@ export async function GET(request: Request) {
   const patientId = searchParams.get("patient_id")
   const date = searchParams.get("date")
 
+  if (!clinicId) {
+    return NextResponse.json([])
+  }
+
   let query = supabase
     .from("appointments")
     .select("*, patient:patients(*)")
+    .eq("clinic_id", clinicId)
     .order("date", { ascending: true })
     .order("start_time", { ascending: true })
-
-  if (clinicId) {
-    query = query.eq("clinic_id", clinicId)
-  }
 
   if (patientId) {
     query = query.eq("patient_id", patientId)
@@ -50,9 +51,9 @@ export async function POST(request: Request) {
         start_time: body.start_time,
         end_time: body.end_time,
         service: body.service,
-        status: body.status || "scheduled",
+        status: body.status || "PENDENTE",
         notes: body.notes || null,
-        amount: body.amount || 0,
+        value: body.amount || body.value || 0,
         clinic_id: clinicId,
       },
     ])
@@ -63,8 +64,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // Auto-create pending payment if amount > 0
-  const amount = body.amount || 0
+  // Auto-create pending payment if value > 0
+  const amount = body.amount || body.value || 0
   if (amount > 0 && data) {
     await supabase.from("payments").insert({
       patient_id: body.patient_id,
