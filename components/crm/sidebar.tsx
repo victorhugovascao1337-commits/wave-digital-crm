@@ -18,6 +18,7 @@ import {
   LogOut,
   Menu,
   X,
+  FileText,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
@@ -26,6 +27,7 @@ import { useRouter } from "next/navigation"
 const navItems = [
   { href: "/", label: "Painel", icon: LayoutDashboard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/pacientes", label: "Pacientes", icon: Users, roles: ["admin", "superadmin", "doctor", "receptionist"] },
+  { href: "/prontuario", label: "Prontuário", icon: FileText, roles: ["admin", "superadmin", "doctor"] },
   { href: "/agenda", label: "Agenda", icon: Calendar, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/pagamentos", label: "Pagamentos", icon: CreditCard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/tarefas", label: "Tarefas", icon: ClipboardList, roles: ["admin", "superadmin", "doctor", "receptionist"] },
@@ -66,7 +68,7 @@ export function Sidebar({ onNovaConsulta, mobileOpen, onMobileClose }: SidebarPr
   // Close mobile sidebar on navigation
   useEffect(() => {
     onMobileClose()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
   const handleLogout = async () => {
