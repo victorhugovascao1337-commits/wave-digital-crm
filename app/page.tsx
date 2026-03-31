@@ -493,12 +493,12 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.pendingPayments.slice(0, 5).map((payment) => (
+                {data.pendingPayments.slice(0, 5).map((payment, idx) => (
                   <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7 bg-gradient-to-br from-blue-400 to-blue-600">
-                          <AvatarFallback className="text-white text-xs font-bold">{payment.initials}</AvatarFallback>
+                        <Avatar className={cn("h-7 w-7 bg-gradient-to-br", avatarGradients[idx % avatarGradients.length])}>
+                          <AvatarFallback className="bg-transparent text-white text-xs font-bold">{payment.initials}</AvatarFallback>
                         </Avatar>
                         <span className="font-medium text-gray-900">{payment.patient}</span>
                       </div>
@@ -512,9 +512,9 @@ export default function DashboardPage() {
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
                         {paidIds.has(payment.id) ? (
-                          <Button size="sm" disabled className="h-7 text-xs bg-emerald-500 hover:bg-emerald-500 text-white border-emerald-500 gap-1">
+                          <span className="inline-flex items-center gap-1 h-7 px-3 text-xs font-semibold rounded-md bg-emerald-500 text-white shadow-sm">
                             <Check className="h-3 w-3" /> Pago ✓
-                          </Button>
+                          </span>
                         ) : payment.status === "pending" ? (
                           <>
                             <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markPaid(payment.id)}>
