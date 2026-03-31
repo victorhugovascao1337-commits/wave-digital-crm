@@ -221,16 +221,16 @@ export default function ConfiguracoesPage() {
 
   return (
     <CRMLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Configurações</h1>
+          <p className="text-sm text-gray-500 mt-1">
             Gerencie as configurações da sua clínica
           </p>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="w-full h-12 bg-muted/50">
+          <TabsList className="w-full h-12 bg-gray-100 rounded-xl p-1">
             <TabsTrigger value="profile" className="flex-1 gap-2">
               <User className="h-4 w-4" />
               Perfil
@@ -251,7 +251,7 @@ export default function ConfiguracoesPage() {
 
           {/* PERFIL */}
           <TabsContent value="profile">
-            <Card className="p-6">
+            <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
               <h2 className="text-lg font-semibold">Informações do Perfil</h2>
               <p className="text-sm text-muted-foreground mb-6">
                 Atualize os dados da clínica e do responsável
@@ -429,7 +429,7 @@ export default function ConfiguracoesPage() {
           {/* ASSINATURA */}
           <TabsContent value="billing">
             <div className="grid grid-cols-2 gap-6 mb-6">
-              <Card className="p-6">
+              <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
                 <h2 className="text-lg font-semibold">Plano Atual</h2>
                 <p className="text-sm text-muted-foreground mb-4">
                   Seu plano de assinatura atual
@@ -455,7 +455,7 @@ export default function ConfiguracoesPage() {
                 </Button>
               </Card>
 
-              <Card className="p-6">
+              <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
                 <h2 className="text-lg font-semibold">Método de Pagamento</h2>
                 <p className="text-sm text-muted-foreground mb-4">
                   Gerencie sua forma de pagamento
@@ -477,14 +477,14 @@ export default function ConfiguracoesPage() {
               </Card>
             </div>
 
-            <Card className="p-6">
+            <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
               <h2 className="text-lg font-semibold">Histórico de Faturas</h2>
               <p className="text-sm text-muted-foreground mb-4">
                 Baixe suas faturas anteriores
               </p>
 
-              <div className="border rounded-lg">
-                <div className="grid grid-cols-4 gap-4 px-4 py-3 bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider rounded-t-lg">
+              <div className="border border-gray-100 rounded-2xl overflow-hidden">
+                <div className="grid grid-cols-4 gap-4 px-4 py-3 bg-gray-50/80 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <div>Data</div>
                   <div>Valor</div>
                   <div>Status</div>
@@ -511,7 +511,7 @@ export default function ConfiguracoesPage() {
 
           {/* NOTIFICAÇÕES */}
           <TabsContent value="notifications">
-            <Card className="p-6">
+            <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
               <h2 className="text-lg font-semibold">Preferências de Notificação</h2>
               <p className="text-sm text-muted-foreground mb-6">
                 Escolha como deseja receber notificações
@@ -656,7 +656,7 @@ export default function ConfiguracoesPage() {
           {/* SEGURANÇA */}
           <TabsContent value="security">
             <div className="space-y-6">
-              <Card className="p-6">
+              <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
                 <h2 className="text-lg font-semibold">Senha</h2>
                 <p className="text-sm text-muted-foreground mb-6">
                   Atualize sua senha para manter sua conta segura
@@ -711,7 +711,7 @@ export default function ConfiguracoesPage() {
                 </form>
               </Card>
 
-              <Card className="p-6">
+              <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
                 <h2 className="text-lg font-semibold">Autenticação em Dois Fatores</h2>
                 <p className="text-sm text-muted-foreground mb-6">
                   Adicione uma camada extra de segurança à sua conta
@@ -740,7 +740,7 @@ export default function ConfiguracoesPage() {
                 </div>
               </Card>
 
-              <Card className="p-6">
+              <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
                 <h2 className="text-lg font-semibold">Sessões Ativas</h2>
                 <p className="text-sm text-muted-foreground mb-6">
                   Gerencie suas sessões ativas em outros dispositivos

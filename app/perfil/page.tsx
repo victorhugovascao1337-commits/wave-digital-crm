@@ -104,15 +104,15 @@ export default function PerfilPage() {
 
   return (
     <CRMLayout>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Meu Perfil</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Meu Perfil</h1>
+          <p className="text-sm text-gray-500 mt-1">
             Atualize os dados da clínica e do responsável
           </p>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 border border-gray-100 shadow-sm rounded-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Logo */}
             <div className="flex items-center gap-4">
