@@ -192,62 +192,107 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {/* Revenue Card */}
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-blue-600 mb-1">Receita Mensal</p>
-              <p className="text-2xl font-bold text-gray-900">{data ? fmtShort(data.monthlyRevenue) : "R$ 0"}</p>
-              <div className="mt-2 flex items-center gap-1">
-                {revenueChange >= 0 ? <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" /> : <ArrowDownRight className="h-3.5 w-3.5 text-red-600" />}
-                <span className={cn("text-xs font-semibold", revenueChange >= 0 ? "text-emerald-600" : "text-red-600")}>
-                  {Math.abs(revenueChange)}% vs mês anterior
-                </span>
+        <Link href="/financeiro" className="block">
+          <Card className="p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-blue-600 mb-1">Receita Mensal</p>
+                <p className="text-xl font-bold text-gray-900">{data ? fmtShort(data.monthlyRevenue) : "R$ 0"}</p>
+                <div className="mt-1.5 flex items-center gap-1">
+                  {revenueChange >= 0 ? <ArrowUpRight className="h-3 w-3 text-emerald-600" /> : <ArrowDownRight className="h-3 w-3 text-red-600" />}
+                  <span className={cn("text-[10px] font-semibold", revenueChange >= 0 ? "text-emerald-600" : "text-red-600")}>
+                    {Math.abs(revenueChange)}% vs anterior
+                  </span>
+                </div>
               </div>
+              <div className="p-2 bg-blue-200 rounded-lg"><DollarSign className="h-5 w-5 text-blue-700" /></div>
             </div>
-            <div className="p-3 bg-blue-200 rounded-lg"><DollarSign className="h-6 w-6 text-blue-700" /></div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
 
         {/* Expenses Card */}
-        <Card className="p-6 bg-gradient-to-br from-red-50 to-red-100 border-0 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-red-600 mb-1">Despesas Mensais</p>
-              <p className="text-2xl font-bold text-gray-900">{data ? fmtShort(data.monthlyExpenses) : "R$ 0"}</p>
-              <p className="text-xs text-red-600 mt-2 font-medium">Este mês</p>
+        <Link href="/financeiro" className="block">
+          <Card className="p-5 bg-gradient-to-br from-red-50 to-red-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-red-600 mb-1">Despesas Mensais</p>
+                <p className="text-xl font-bold text-gray-900">{data ? fmtShort(data.monthlyExpenses) : "R$ 0"}</p>
+                <p className="text-[10px] text-red-600 mt-1.5 font-medium">Este mês</p>
+              </div>
+              <div className="p-2 bg-red-200 rounded-lg"><Banknote className="h-5 w-5 text-red-700" /></div>
             </div>
-            <div className="p-3 bg-red-200 rounded-lg"><Banknote className="h-6 w-6 text-red-700" /></div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
 
         {/* Net Profit Card */}
-        <Card className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-0 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-emerald-600 mb-1">Lucro Líquido</p>
-              <p className="text-2xl font-bold text-gray-900">{data ? fmtShort(data.netProfit) : "R$ 0"}</p>
-              <p className="text-xs text-emerald-600 mt-2 font-medium">Este mês</p>
+        <Link href="/financeiro" className="block">
+          <Card className="p-5 bg-gradient-to-br from-emerald-50 to-emerald-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-emerald-600 mb-1">Lucro Líquido</p>
+                <p className="text-xl font-bold text-gray-900">{data ? fmtShort(data.netProfit) : "R$ 0"}</p>
+                <p className="text-[10px] text-emerald-600 mt-1.5 font-medium">Este mês</p>
+              </div>
+              <div className="p-2 bg-emerald-200 rounded-lg"><TrendingUp className="h-5 w-5 text-emerald-700" /></div>
             </div>
-            <div className="p-3 bg-emerald-200 rounded-lg"><TrendingUp className="h-6 w-6 text-emerald-700" /></div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
+
+        {/* Consultas Hoje Card */}
+        <Link href="/agenda" className="block">
+          <Card className="p-5 bg-gradient-to-br from-sky-50 to-sky-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-sky-600 mb-1">Consultas Hoje</p>
+                <p className="text-xl font-bold text-gray-900">{data?.todayAppointments || 0}</p>
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {data?.todayByStatus && Object.entries(data.todayByStatus).map(([status, count]) => (
+                    <span key={status} className={cn("text-[9px] px-1.5 py-0.5 rounded-full font-semibold", getStatusColor(status))}>
+                      {count} {getStatusLabel(status).substring(0, 4)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="p-2 bg-sky-200 rounded-lg"><Calendar className="h-5 w-5 text-sky-700" /></div>
+            </div>
+          </Card>
+        </Link>
 
         {/* Active Patients Card */}
-        <Card className="p-6 bg-gradient-to-br from-violet-50 to-violet-100 border-0 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-violet-600 mb-1">Pacientes Ativos</p>
-              <p className="text-2xl font-bold text-gray-900">{data?.activePatients || 0}</p>
-              <div className="mt-2 flex items-center gap-1">
-                <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" />
-                <span className="text-xs font-semibold text-emerald-600">{data ? data.newPatientsThisMonth : 0} novos</span>
+        <Link href="/pacientes" className="block">
+          <Card className="p-5 bg-gradient-to-br from-violet-50 to-violet-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-violet-600 mb-1">Pacientes Ativos</p>
+                <p className="text-xl font-bold text-gray-900">{data?.activePatients || 0}</p>
+                <div className="mt-1.5 flex items-center gap-1">
+                  <ArrowUpRight className="h-3 w-3 text-emerald-600" />
+                  <span className="text-[10px] font-semibold text-emerald-600">{data ? data.newPatientsThisMonth : 0} novos</span>
+                </div>
               </div>
+              <div className="p-2 bg-violet-200 rounded-lg"><Users className="h-5 w-5 text-violet-700" /></div>
             </div>
-            <div className="p-3 bg-violet-200 rounded-lg"><Users className="h-6 w-6 text-violet-700" /></div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
+
+        {/* Pendências Card */}
+        <Link href="/financeiro" className="block">
+          <Card className="p-5 bg-gradient-to-br from-amber-50 to-amber-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-amber-600 mb-1">Pendências</p>
+                <p className="text-xl font-bold text-gray-900">{data?.pendencias || 0}</p>
+                <div className="mt-1.5 flex flex-col gap-0.5">
+                  {(data?.pendingCount || 0) > 0 && <span className="text-[10px] font-semibold text-amber-600">{data?.pendingCount} pendente(s)</span>}
+                  {(data?.overdueCount || 0) > 0 && <span className="text-[10px] font-semibold text-red-600">{data?.overdueCount} atrasado(s)</span>}
+                </div>
+              </div>
+              <div className="p-2 bg-amber-200 rounded-lg"><AlertCircle className="h-5 w-5 text-amber-700" /></div>
+            </div>
+          </Card>
+        </Link>
       </div>
 
       {/* Main Content Grid */}
@@ -257,7 +302,10 @@ export default function DashboardPage() {
           <Card className="p-6 shadow-sm border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-900">Agenda de Hoje</h2>
-              <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-0">{data?.todayAppointments || 0} agendamentos</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-0">{data?.todayAppointments || 0} agendamentos</Badge>
+                <Link href="/agenda" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver agenda <ExternalLink className="h-3 w-3" /></Link>
+              </div>
             </div>
 
             {data?.todaySchedule && data.todaySchedule.length > 0 ? (
@@ -288,7 +336,10 @@ export default function DashboardPage() {
 
         {/* Occupation Rate */}
         <Card className="p-6 shadow-sm border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Taxa de Ocupação</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">Taxa de Ocupação</h2>
+            <Link href="/agenda" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver agenda <ExternalLink className="h-3 w-3" /></Link>
+          </div>
           <div className="flex flex-col items-center justify-center py-4">
             <div className="relative w-32 h-32 mb-4">
               <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -320,7 +371,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Daily Revenue Chart */}
         <Card className="p-6 shadow-sm border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Receita Diária (7 dias)</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">Receita Diária (7 dias)</h2>
+            <Link href="/financeiro" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver financeiro <ExternalLink className="h-3 w-3" /></Link>
+          </div>
           {data?.dailyRevenue && data.dailyRevenue.length > 0 ? (
             <div className="space-y-2">
               {data.dailyRevenue.map((day, idx) => (
@@ -343,7 +397,10 @@ export default function DashboardPage() {
 
         {/* Payment Methods */}
         <Card className="p-6 shadow-sm border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Meios de Pagamento</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">Meios de Pagamento</h2>
+            <Link href="/financeiro" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver financeiro <ExternalLink className="h-3 w-3" /></Link>
+          </div>
           {data?.paymentMethods && data.paymentMethods.length > 0 ? (
             <div className="space-y-3">
               {data.paymentMethods.map((method, idx) => {
@@ -410,7 +467,10 @@ export default function DashboardPage() {
       {/* Pending Payments Table */}
       {data?.pendingPayments && data.pendingPayments.length > 0 && (
         <Card className="p-6 shadow-sm border-gray-100 mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Últimos Pagamentos Pendentes</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">Últimos Pagamentos Pendentes</h2>
+            <Link href="/financeiro" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver todos <ExternalLink className="h-3 w-3" /></Link>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -466,7 +526,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
         <Card className="p-6 shadow-sm border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Atividade Recente</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">Atividade Recente</h2>
+            <Link href="/tarefas" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver tarefas <ExternalLink className="h-3 w-3" /></Link>
+          </div>
           {data?.recentActivity && data.recentActivity.length > 0 ? (
             <div className="space-y-3">
               {data.recentActivity.map((activity, idx) => {
@@ -495,7 +558,10 @@ export default function DashboardPage() {
 
         {/* Birthdays */}
         <Card className="p-6 shadow-sm border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Próximos Aniversários</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">Próximos Aniversários</h2>
+            <Link href="/pacientes" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver pacientes <ExternalLink className="h-3 w-3" /></Link>
+          </div>
           {data?.birthdays && data.birthdays.length > 0 ? (
             <div className="space-y-3">
               {data.birthdays.map((birthday) => (
