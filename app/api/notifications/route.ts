@@ -14,8 +14,8 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from("notifications")
-    .select("*, patients(id, full_name, phone)")
-    .eq("organization_id", clinicId)
+    .select("*, patients(id, name, phone)")
+    .eq("clinic_id", clinicId)
     .order("created_at", { ascending: false })
     .limit(100)
 
@@ -41,15 +41,12 @@ export async function POST(req: NextRequest) {
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     const tomorrowStr = tomorrow.toISOString().split("T")[0]
-    const tomorrowStart = `${tomorrowStr}T00:00:00`
-    const tomorrowEnd = `${tomorrowStr}T23:59:59`
 
     const { data: appointments } = await supabase
       .from("appointments")
-      .select("id, starts_at, service_type, patients(id, full_name, phone)")
-      .eq("organization_id", clinicId)
-      .gte("starts_at", tomorrowStart)
-      .lte("starts_at", tomorrowEnd)
+      .select("id, date, start_time, service, patients(id, name, phone)")
+      .eq("clinic_id", clinicId)
+      .eq("date", tomorrowStr)
       .not("status", "in", '("CANCELADO","FALTOU")')
 
     if (!appointments || appointments.length === 0) {
@@ -60,7 +57,7 @@ export async function POST(req: NextRequest) {
     const { data: existing } = await supabase
       .from("notifications")
       .select("appointment_id")
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
       .eq("type", "reminder")
       .in("appointment_id", appointments.map((a: any) => a.id))
 
@@ -70,20 +67,18 @@ export async function POST(req: NextRequest) {
       .filter((a: any) => !existingIds.has(a.id))
       .map((a: any) => {
         const patient = a.patients as any
-        const time = a.starts_at
-          ? new Date(a.starts_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })
-          : ""
+        const time = a.start_time ? a.start_time.substring(0, 5) : ""
         const dateFormatted = tomorrow.toLocaleDateString("pt-BR")
         return {
-          organization_id: clinicId,
+          clinic_id: clinicId,
           patient_id: patient?.id || null,
           appointment_id: a.id,
           channel: "whatsapp",
           type: "reminder",
-          message: `Olá ${patient?.full_name || "Paciente"}! Lembramos da sua consulta amanhã (${dateFormatted}) às ${time}${a.service_type ? ` — ${a.service_type}` : ""}. Confirma presença? Responda SIM ou NÃO.`,
+          message: `Olá ${patient?.name || "Paciente"}! Lembramos da sua consulta amanhã (${dateFormatted}) às ${time}${a.service ? ` — ${a.service}` : ""}. Confirma presença? Responda SIM ou NÃO.`,
           status: "pending",
           scheduled_for: new Date(`${tomorrowStr}T08:00:00-03:00`).toISOString(),
-          metadata: { phone: patient?.phone || "", service: a.service_type || "" },
+          metadata: { phone: patient?.phone || "", service: a.service || "" },
         }
       })
 
@@ -101,8 +96,8 @@ export async function POST(req: NextRequest) {
   if (action === "generate_payment_reminders") {
     const { data: pendingPayments } = await supabase
       .from("payments")
-      .select("id, amount, due_date, status, patients(id, full_name, phone)")
-      .eq("organization_id", clinicId)
+      .select("id, amount, due_date, status, patients(id, name, phone)")
+      .eq("clinic_id", clinicId)
       .in("status", ["pending", "overdue"])
 
     if (!pendingPayments || pendingPayments.length === 0) {
@@ -116,11 +111,11 @@ export async function POST(req: NextRequest) {
         const amount = `R$ ${Number(p.amount).toFixed(2).replace(".", ",")}`
         const statusText = p.status === "overdue" ? "em atraso" : "pendente"
         return {
-          organization_id: clinicId,
+          clinic_id: clinicId,
           patient_id: patient?.id || null,
           channel: "whatsapp",
           type: "follow_up",
-          message: `Olá ${patient?.full_name || "Paciente"}! Passando para lembrar do pagamento ${statusText} no valor de ${amount}. Podemos ajudar com alguma forma de pagamento?`,
+          message: `Olá ${patient?.name || "Paciente"}! Passando para lembrar do pagamento ${statusText} no valor de ${amount}. Podemos ajudar com alguma forma de pagamento?`,
           status: "pending",
           metadata: { phone: patient?.phone || "", payment_id: p.id, amount: p.amount },
         }
@@ -136,43 +131,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ created: newNotifications.length, message: `${newNotifications.length} cobrança(s) criada(s)` })
   }
 
-  // === GENERATE BIRTHDAY MESSAGES ===
+  // === GENERATE BIRTHDAY MESSAGES (disabled — patients table has no date_of_birth column) ===
   if (action === "generate_birthdays") {
-    const now = new Date()
-    const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
-    const today = now.getDate()
-
-    const { data: patients } = await supabase
-      .from("patients")
-      .select("id, full_name, phone, date_of_birth")
-      .eq("organization_id", clinicId)
-      .not("date_of_birth", "is", null)
-      .not("phone", "is", null)
-
-    const birthdayPatients = (patients || []).filter((p: any) => {
-      if (!p.date_of_birth) return false
-      const parts = p.date_of_birth.split("-")
-      return parts[1] === currentMonth && parseInt(parts[2]) === today
-    })
-
-    if (birthdayPatients.length === 0) {
-      return NextResponse.json({ created: 0, message: "Nenhum aniversariante hoje" })
-    }
-
-    const newNotifications = birthdayPatients.map((p: any) => ({
-      organization_id: clinicId,
-      patient_id: p.id,
-      channel: "whatsapp",
-      type: "birthday",
-      message: `Olá ${p.full_name}! A equipe da clínica deseja um feliz aniversário! Esperamos que tenha um dia muito especial!`,
-      status: "pending",
-      metadata: { phone: p.phone || "" },
-    }))
-
-    const { error } = await supabase.from("notifications").insert(newNotifications)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-    return NextResponse.json({ created: newNotifications.length, message: `${newNotifications.length} parabéns enviado(s)` })
+    return NextResponse.json({ created: 0, message: "Recurso de aniversários desativado temporariamente" })
   }
 
   // === SEND CUSTOM MESSAGE ===
@@ -180,7 +141,7 @@ export async function POST(req: NextRequest) {
     const { patient_id, message, channel = "whatsapp" } = body
 
     const { error } = await supabase.from("notifications").insert({
-      organization_id: clinicId,
+      clinic_id: clinicId,
       patient_id,
       channel,
       type: "custom",
@@ -200,7 +161,7 @@ export async function POST(req: NextRequest) {
       .from("notifications")
       .update({ status: "sent", sent_at: new Date().toISOString() })
       .eq("id", id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })

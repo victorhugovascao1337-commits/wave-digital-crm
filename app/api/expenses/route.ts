@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   let query = supabase
     .from("expenses")
     .select("*, category:financial_categories(id, name, color)")
-    .eq("organization_id", clinicId)
+    .eq("clinic_id", clinicId)
     .order("expense_date", { ascending: false })
 
   if (status) query = query.eq("status", status)
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from("expenses")
       .insert([{
-        organization_id: clinicId,
+        clinic_id: clinicId,
         category_id: body.category_id || null,
         description: body.description,
         amount: body.amount,
@@ -80,7 +80,7 @@ export async function PUT(request: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", body.id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
       .select("*, category:financial_categories(id, name, color)")
       .single()
 
@@ -105,7 +105,7 @@ export async function DELETE(request: Request) {
       .from("expenses")
       .delete()
       .eq("id", id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })

@@ -10,7 +10,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("financial_categories")
     .select("*")
-    .eq("organization_id", clinicId)
+    .eq("clinic_id", clinicId)
     .order("name", { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from("financial_categories")
       .insert([{
-        organization_id: clinicId,
+        clinic_id: clinicId,
         name: body.name,
         type: body.type,
         color: body.color || "#6366f1",
@@ -55,7 +55,7 @@ export async function DELETE(request: Request) {
       .from("financial_categories")
       .delete()
       .eq("id", id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })

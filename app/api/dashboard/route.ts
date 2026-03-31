@@ -51,7 +51,7 @@ export async function GET() {
     })
   }
 
-  const withClinic = (query: any) => query.eq("organization_id", clinicId)
+  const withClinic = (query: any) => query.eq("clinic_id", clinicId)
 
   // === REVENUE ===
   const { data: paidPayments } = await withClinic(
@@ -85,38 +85,42 @@ export async function GET() {
   )
 
   // === TODAY'S APPOINTMENTS ===
-  const todayStart = `${today}T00:00:00`
-  const todayEnd = `${today}T23:59:59`
-
   const { data: todayAppts } = await withClinic(
-    supabase.from("appointments").select("id, starts_at, ends_at, status, service_type, patient_id, patients(id, full_name, phone)").gte("starts_at", todayStart).lte("starts_at", todayEnd).order("starts_at", { ascending: true })
+    supabase
+      .from("appointments")
+      .select("id, date, start_time, end_time, status, service, patient_id, professional, value, patients(id, name, phone)")
+      .eq("date", today)
+      .order("start_time", { ascending: true })
   )
 
   const todayAppointments = todayAppts?.length || 0
   const todayByStatus: Record<string, number> = {}
   todayAppts?.forEach((a: any) => {
-    const s = a.status || "scheduled"
+    const s = a.status || "PENDENTE"
     todayByStatus[s] = (todayByStatus[s] || 0) + 1
   })
 
   // Today schedule formatted
   const todaySchedule = (todayAppts || []).map((a: any) => ({
     id: a.id,
-    time: a.starts_at ? new Date(a.starts_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }) : "",
-    endTime: a.ends_at ? new Date(a.ends_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }) : "",
-    patient: a.patients?.full_name || "Paciente",
-    service: a.service_type || "",
-    status: a.status || "scheduled",
+    time: a.start_time ? a.start_time.substring(0, 5) : "",
+    endTime: a.end_time ? a.end_time.substring(0, 5) : "",
+    patient: a.patients?.name || "Paciente",
+    service: a.service || "",
+    status: a.status || "PENDENTE",
     phone: a.patients?.phone || "",
-    initials: (a.patients?.full_name || "??").split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
+    professional: a.professional || "",
+    value: Number(a.value) || 0,
+    initials: (a.patients?.name || "??").split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
   }))
 
   // === WEEK OCCUPATION ===
-  const weekEnd = `${today}T23:59:59`
-  const weekStartTs = `${weekStart}T00:00:00`
-
   const { count: weekAppointments } = await withClinic(
-    supabase.from("appointments").select("*", { count: "exact", head: true }).gte("starts_at", weekStartTs).lte("starts_at", weekEnd)
+    supabase
+      .from("appointments")
+      .select("*", { count: "exact", head: true })
+      .gte("date", weekStart)
+      .lte("date", today)
   )
 
   // Assuming 8h-19h = 22 half-hour slots per day, 5 days = 110 slots
@@ -125,7 +129,12 @@ export async function GET() {
 
   // === PENDING PAYMENTS ===
   const { data: pendingPmts } = await withClinic(
-    supabase.from("payments").select("id, amount, status, due_date, description, patient_id, patients(id, full_name, phone)").in("status", ["pending", "overdue"]).order("due_date", { ascending: true }).limit(5)
+    supabase
+      .from("payments")
+      .select("id, amount, status, due_date, description, patient_id, patients(id, name, phone)")
+      .in("status", ["pending", "overdue"])
+      .order("due_date", { ascending: true })
+      .limit(5)
   )
 
   const pendingTotal = pendingPmts?.filter((p: any) => p.status === "pending").reduce((s: number, p: any) => s + Number(p.amount), 0) || 0
@@ -135,13 +144,13 @@ export async function GET() {
 
   const pendingPayments = (pendingPmts || []).map((p: any) => ({
     id: p.id,
-    patient: p.patients?.full_name || "Paciente",
+    patient: p.patients?.name || "Paciente",
     phone: p.patients?.phone || "",
     amount: Number(p.amount),
     dueDate: p.due_date,
     status: p.status,
     description: p.description,
-    initials: (p.patients?.full_name || "??").split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
+    initials: (p.patients?.name || "??").split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
   }))
 
   // === DAILY REVENUE (last 7 days) ===
@@ -194,20 +203,24 @@ export async function GET() {
 
   // Recent appointments
   const { data: recentAppts } = await withClinic(
-    supabase.from("appointments").select("id, starts_at, service_type, status, patients(full_name)").order("created_at", { ascending: false }).limit(3)
+    supabase
+      .from("appointments")
+      .select("id, date, start_time, service, status, patients(name)")
+      .order("created_at", { ascending: false })
+      .limit(3)
   )
   recentAppts?.forEach((a: any) => {
     recentActivity.push({
       type: "appointment",
       icon: "calendar",
-      text: `Consulta agendada: ${a.patients?.full_name || "Paciente"} — ${a.service_type || "Consulta"}`,
-      time: a.starts_at,
+      text: `Consulta agendada: ${a.patients?.name || "Paciente"} — ${a.service || "Consulta"}`,
+      time: a.date ? `${a.date}T${a.start_time || "00:00:00"}` : new Date().toISOString(),
     })
   })
 
   // Recent documents
   const { data: recentDocs } = await withClinic(
-    supabase.from("clinical_documents").select("id, document_type, created_at, patients(full_name)").order("created_at", { ascending: false }).limit(3)
+    supabase.from("clinical_documents").select("id, document_type, created_at, patients(name)").order("created_at", { ascending: false }).limit(3)
   )
   const docTypeLabels: Record<string, string> = {
     prescription: "Receituário",
@@ -219,20 +232,20 @@ export async function GET() {
     recentActivity.push({
       type: "document",
       icon: "file",
-      text: `${docTypeLabels[d.document_type] || "Documento"} criado para ${d.patients?.full_name || "Paciente"}`,
+      text: `${docTypeLabels[d.document_type] || "Documento"} criado para ${d.patients?.name || "Paciente"}`,
       time: d.created_at,
     })
   })
 
   // Recent payments
   const { data: recentPmts } = await withClinic(
-    supabase.from("payments").select("id, amount, status, created_at, patients(full_name)").eq("status", "paid").order("updated_at", { ascending: false }).limit(3)
+    supabase.from("payments").select("id, amount, status, created_at, patients(name)").eq("status", "paid").order("updated_at", { ascending: false }).limit(3)
   )
   recentPmts?.forEach((p: any) => {
     recentActivity.push({
       type: "payment",
       icon: "dollar",
-      text: `Pagamento recebido: R$ ${Number(p.amount).toFixed(2).replace(".", ",")} — ${p.patients?.full_name || "Paciente"}`,
+      text: `Pagamento recebido: R$ ${Number(p.amount).toFixed(2).replace(".", ",")} — ${p.patients?.name || "Paciente"}`,
       time: p.created_at,
     })
   })
@@ -240,27 +253,8 @@ export async function GET() {
   // Sort by time desc
   recentActivity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
 
-  // === BIRTHDAYS THIS MONTH ===
-  const currentMonth = String(now.getMonth() + 1).padStart(2, "0")
-  const { data: birthdayPatients } = await withClinic(
-    supabase.from("patients").select("id, full_name, date_of_birth, phone").not("date_of_birth", "is", null)
-  )
-
-  const birthdays = (birthdayPatients || [])
-    .filter((p: any) => {
-      if (!p.date_of_birth) return false
-      const month = p.date_of_birth.split("-")[1]
-      return month === currentMonth
-    })
-    .map((p: any) => ({
-      id: p.id,
-      name: p.full_name,
-      date: p.date_of_birth,
-      phone: p.phone,
-      day: parseInt(p.date_of_birth.split("-")[2]),
-      initials: (p.full_name || "??").split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
-    }))
-    .sort((a: any, b: any) => a.day - b.day)
+  // === BIRTHDAYS THIS MONTH (disabled — patients table has no date_of_birth column) ===
+  const birthdays: any[] = []
 
   return NextResponse.json({
     monthlyRevenue,

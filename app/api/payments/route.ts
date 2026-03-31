@@ -15,8 +15,8 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("payments")
-    .select("*, patient:patients(id, full_name, cpf, phone, email)")
-    .eq("organization_id", clinicId)
+    .select("*, patient:patients(id, name, cpf, phone, email)")
+    .eq("clinic_id", clinicId)
     .order("created_at", { ascending: false })
 
   if (patientId) query = query.eq("patient_id", patientId)
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from("payments")
       .insert([{
-        organization_id: clinicId,
+        clinic_id: clinicId,
         patient_id: body.patient_id,
         appointment_id: body.appointment_id || null,
         description: body.description || null,
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         payment_date: body.payment_date || null,
         due_date: body.due_date || null,
       }])
-      .select("*, patient:patients(id, full_name, cpf, phone, email)")
+      .select("*, patient:patients(id, name, cpf, phone, email)")
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -78,8 +78,8 @@ export async function PUT(request: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", body.id)
-      .eq("organization_id", clinicId)
-      .select("*, patient:patients(id, full_name, cpf, phone, email)")
+      .eq("clinic_id", clinicId)
+      .select("*, patient:patients(id, name, cpf, phone, email)")
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -103,7 +103,7 @@ export async function DELETE(request: Request) {
       .from("payments")
       .delete()
       .eq("id", id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })

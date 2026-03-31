@@ -13,8 +13,8 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("clinical_documents")
-    .select("*, patient:patients(id, full_name, cpf, date_of_birth, phone, email)")
-    .eq("organization_id", clinicId)
+    .select("*, patient:patients(id, name, cpf, phone, email)")
+    .eq("clinic_id", clinicId)
     .order("created_at", { ascending: false })
 
   if (patientId) {
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from("clinical_documents")
       .insert([{
-        organization_id: clinicId,
+        clinic_id: clinicId,
         patient_id: body.patient_id,
         professional_id: body.professional_id || null,
         document_type: body.document_type,
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         professional_credentials: body.professional_credentials || null,
         signature_image_url: body.signature_image_url || null,
       }])
-      .select("*, patient:patients(id, full_name, cpf, date_of_birth, phone, email)")
+      .select("*, patient:patients(id, name, cpf, phone, email)")
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -104,8 +104,8 @@ export async function PUT(request: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", body.id)
-      .eq("organization_id", clinicId)
-      .select("*, patient:patients(id, full_name, cpf, date_of_birth, phone, email)")
+      .eq("clinic_id", clinicId)
+      .select("*, patient:patients(id, name, cpf, phone, email)")
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -129,7 +129,7 @@ export async function DELETE(request: Request) {
       .from("clinical_documents")
       .delete()
       .eq("id", id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
