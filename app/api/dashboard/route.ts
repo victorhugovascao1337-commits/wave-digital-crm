@@ -26,41 +26,25 @@ export async function GET() {
 
   if (!clinicId) {
     return NextResponse.json({
-      monthlyRevenue: 0,
-      prevMonthRevenue: 0,
-      monthlyExpenses: 0,
-      netProfit: 0,
-      activePatients: 0,
-      newPatientsThisMonth: 0,
-      prevMonthPatients: 0,
-      todayAppointments: 0,
-      todayByStatus: {},
-      weekAppointments: 0,
-      weekSlots: 0,
-      pendingTotal: 0,
-      pendingCount: 0,
-      overdueTotal: 0,
-      overdueCount: 0,
-      pendencias: 0,
-      dailyRevenue: [],
-      paymentMethods: [],
-      recentActivity: [],
-      birthdays: [],
-      todaySchedule: [],
-      pendingPayments: [],
+      monthlyRevenue: 0, prevMonthRevenue: 0, monthlyExpenses: 0, netProfit: 0,
+      activePatients: 0, newPatientsThisMonth: 0, prevMonthPatients: 0,
+      todayAppointments: 0, todayByStatus: {}, weekAppointments: 0, weekSlots: 0,
+      pendingTotal: 0, pendingCount: 0, overdueTotal: 0, overdueCount: 0, pendencias: 0,
+      dailyRevenue: [], paymentMethods: [], recentActivity: [], birthdays: [],
+      todaySchedule: [], pendingPayments: [],
     })
   }
 
   const withClinic = (query: any) => query.eq("clinic_id", clinicId)
 
-  // === REVENUE ===
+  // === REVENUE === (fixed: use created_at instead of payment_date which doesn't exist)
   const { data: paidPayments } = await withClinic(
-    supabase.from("payments").select("amount").eq("status", "paid").gte("payment_date", firstDayOfMonth).lte("payment_date", lastDayOfMonth)
+    supabase.from("payments").select("amount").eq("status", "paid").gte("created_at", `${firstDayOfMonth}T00:00:00`).lte("created_at", `${lastDayOfMonth}T23:59:59`)
   )
   const monthlyRevenue = paidPayments?.reduce((s: number, p: any) => s + Number(p.amount), 0) || 0
 
   const { data: prevPaidPayments } = await withClinic(
-    supabase.from("payments").select("amount").eq("status", "paid").gte("payment_date", firstDayPrevMonth).lte("payment_date", lastDayPrevMonth)
+    supabase.from("payments").select("amount").eq("status", "paid").gte("created_at", `${firstDayPrevMonth}T00:00:00`).lte("created_at", `${lastDayPrevMonth}T23:59:59`)
   )
   const prevMonthRevenue = prevPaidPayments?.reduce((s: number, p: any) => s + Number(p.amount), 0) || 0
 
@@ -75,11 +59,9 @@ export async function GET() {
   const { count: activePatients } = await withClinic(
     supabase.from("patients").select("*", { count: "exact", head: true })
   )
-
   const { count: newPatientsThisMonth } = await withClinic(
     supabase.from("patients").select("*", { count: "exact", head: true }).gte("created_at", firstDayOfMonth)
   )
-
   const { count: prevMonthPatients } = await withClinic(
     supabase.from("patients").select("*", { count: "exact", head: true }).gte("created_at", firstDayPrevMonth).lt("created_at", firstDayOfMonth)
   )
@@ -92,7 +74,6 @@ export async function GET() {
       .eq("date", today)
       .order("start_time", { ascending: true })
   )
-
   const todayAppointments = todayAppts?.length || 0
   const todayByStatus: Record<string, number> = {}
   todayAppts?.forEach((a: any) => {
@@ -122,8 +103,7 @@ export async function GET() {
       .gte("date", weekStart)
       .lte("date", today)
   )
-
-  // Assuming 8h-19h = 22 half-hour slots per day, 5 days = 110 slots
+  // Assuming 8h-19h = 22 half-hour slots per day, 5 days
   const daysElapsed = Math.min(((now.getDay() || 7) - 1) + 1, 5)
   const weekSlots = daysElapsed * 22
 
@@ -136,7 +116,6 @@ export async function GET() {
       .order("due_date", { ascending: true })
       .limit(5)
   )
-
   const pendingTotal = pendingPmts?.filter((p: any) => p.status === "pending").reduce((s: number, p: any) => s + Number(p.amount), 0) || 0
   const pendingCount = pendingPmts?.filter((p: any) => p.status === "pending").length || 0
   const overdueTotal = pendingPmts?.filter((p: any) => p.status === "overdue").reduce((s: number, p: any) => s + Number(p.amount), 0) || 0
@@ -153,13 +132,13 @@ export async function GET() {
     initials: (p.patients?.name || "??").split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
   }))
 
-  // === DAILY REVENUE (last 7 days) ===
+  // === DAILY REVENUE (last 7 days) === (fixed: use created_at instead of payment_date)
   const sevenDaysAgo = new Date(now)
   sevenDaysAgo.setDate(now.getDate() - 6)
   const sevenDaysAgoStr = sevenDaysAgo.toISOString().split("T")[0]
 
   const { data: dailyPayments } = await withClinic(
-    supabase.from("payments").select("amount, payment_date").eq("status", "paid").gte("payment_date", sevenDaysAgoStr).lte("payment_date", today)
+    supabase.from("payments").select("amount, created_at").eq("status", "paid").gte("created_at", `${sevenDaysAgoStr}T00:00:00`).lte("created_at", `${today}T23:59:59`)
   )
 
   const dailyMap: Record<string, number> = {}
@@ -169,8 +148,9 @@ export async function GET() {
     dailyMap[d.toISOString().split("T")[0]] = 0
   }
   dailyPayments?.forEach((p: any) => {
-    if (dailyMap[p.payment_date] !== undefined) {
-      dailyMap[p.payment_date] += Number(p.amount)
+    const pDate = (p.created_at || "").substring(0, 10)
+    if (dailyMap[pDate] !== undefined) {
+      dailyMap[pDate] += Number(p.amount)
     }
   })
 
@@ -183,17 +163,15 @@ export async function GET() {
     }
   })
 
-  // === PAYMENT METHODS ===
+  // === PAYMENT METHODS === (fixed: use created_at instead of payment_date)
   const { data: methodPayments } = await withClinic(
-    supabase.from("payments").select("payment_method, amount").eq("status", "paid").gte("payment_date", firstDayOfMonth).lte("payment_date", lastDayOfMonth)
+    supabase.from("payments").select("payment_method, amount").eq("status", "paid").gte("created_at", `${firstDayOfMonth}T00:00:00`).lte("created_at", `${lastDayOfMonth}T23:59:59`)
   )
-
   const methodMap: Record<string, number> = {}
   methodPayments?.forEach((p: any) => {
     const method = p.payment_method || "Não informado"
     methodMap[method] = (methodMap[method] || 0) + Number(p.amount)
   })
-
   const paymentMethods = Object.entries(methodMap)
     .map(([method, total]) => ({ method, total }))
     .sort((a, b) => b.total - a.total)
@@ -257,27 +235,16 @@ export async function GET() {
   const birthdays: any[] = []
 
   return NextResponse.json({
-    monthlyRevenue,
-    prevMonthRevenue,
-    monthlyExpenses,
-    netProfit,
+    monthlyRevenue, prevMonthRevenue, monthlyExpenses, netProfit,
     activePatients: activePatients || 0,
     newPatientsThisMonth: newPatientsThisMonth || 0,
     prevMonthPatients: prevMonthPatients || 0,
-    todayAppointments,
-    todayByStatus,
-    weekAppointments: weekAppointments || 0,
-    weekSlots,
-    pendingTotal,
-    pendingCount,
-    overdueTotal,
-    overdueCount,
+    todayAppointments, todayByStatus,
+    weekAppointments: weekAppointments || 0, weekSlots,
+    pendingTotal, pendingCount, overdueTotal, overdueCount,
     pendencias: pendingCount + overdueCount,
-    dailyRevenue,
-    paymentMethods,
+    dailyRevenue, paymentMethods,
     recentActivity: recentActivity.slice(0, 8),
-    birthdays,
-    todaySchedule,
-    pendingPayments,
+    birthdays, todaySchedule, pendingPayments,
   })
 }

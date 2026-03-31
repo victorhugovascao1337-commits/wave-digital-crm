@@ -21,7 +21,7 @@ const allTabs = [
   { href: "/", label: "Painel", icon: LayoutDashboard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/pacientes", label: "Pacientes", icon: Users, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/agenda", label: "Agenda", icon: Calendar, roles: ["admin", "superadmin", "doctor", "receptionist"] },
-  { href: "/pagamentos", label: "Pagamentos", icon: CreditCard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
+  { href: "/financeiro", label: "Financeiro", icon: CreditCard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/tarefas", label: "Tarefas", icon: ClipboardList, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/insights", label: "Relatórios", icon: TrendingUp, roles: ["admin", "superadmin", "doctor"] },
   { href: "/usuarios", label: "Usuários", icon: UserCog, roles: ["admin", "superadmin"] },
@@ -39,6 +39,7 @@ export function MobileNav() {
   }, [])
 
   const filteredTabs = allTabs.filter((t) => t.roles.includes(userRole))
+
   // Show first 4 in bottom bar, rest in "Mais" menu
   const mainTabs = filteredTabs.slice(0, 4)
   const moreTabs = filteredTabs.slice(4)

@@ -7,30 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
-  TrendingUp,
-  Users,
-  Calendar,
-  AlertCircle,
-  MessageSquare,
-  ExternalLink,
-  Check,
-  Zap,
-  DollarSign,
-  FileText,
-  Cake,
-  ArrowUpRight,
-  ArrowDownRight,
-  PlusCircle,
-  UserPlus,
-  Receipt,
-  Wallet,
-  Activity,
-  Target,
-  BarChart3,
-  Sparkles,
-  CreditCard,
-  Banknote,
-  QrCode,
+  TrendingUp, Users, Calendar, AlertCircle, MessageSquare, ExternalLink,
+  Check, Zap, DollarSign, FileText, Cake, ArrowUpRight, ArrowDownRight,
+  PlusCircle, UserPlus, Receipt, Wallet, Activity, Target, BarChart3,
+  Sparkles, CreditCard, Banknote, QrCode,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
@@ -154,9 +134,7 @@ export default function DashboardPage() {
     return Wallet
   }
 
-  const methodColors = [
-    "bg-violet-500", "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500",
-  ]
+  const methodColors = ["bg-violet-500", "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"]
 
   const handleWhatsApp = (phone: string, name: string, msg: string) => {
     const message = encodeURIComponent(msg)
@@ -165,13 +143,15 @@ export default function DashboardPage() {
 
   const markPaid = async (id: string) => {
     try {
-      await fetch(`/api/payments/${id}`, {
-        method: "PATCH",
+      await fetch("/api/payments", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "paid", payment_date: new Date().toISOString().split("T")[0] }),
+        body: JSON.stringify({ id, status: "paid" }),
       })
       fetchData()
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   const getTodayFormatted = () => {
@@ -204,598 +184,341 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-400 mt-0.5">{getTodayFormatted()}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Link href="/agenda">
-            <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 font-semibold text-xs h-9">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Agendamento</span>
-            </Button>
-          </Link>
-          <Link href="/pacientes">
-            <Button size="sm" variant="outline" className="gap-1.5 rounded-xl font-semibold text-xs h-9 border-gray-200">
-              <UserPlus className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Paciente</span>
-            </Button>
-          </Link>
-          <Link href="/documentos">
-            <Button size="sm" variant="outline" className="gap-1.5 rounded-xl font-semibold text-xs h-9 border-gray-200">
-              <FileText className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Documento</span>
-            </Button>
-          </Link>
-          {canSeeFinancials && (
-            <Link href="/financeiro">
-              <Button size="sm" variant="outline" className="gap-1.5 rounded-xl font-semibold text-xs h-9 border-gray-200">
-                <Receipt className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Financeiro</span>
-              </Button>
-            </Link>
-          )}
+          <Link href="/agenda"><Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 font-semibold text-xs h-9"><PlusCircle className="h-3.5 w-3.5" /><span className="hidden sm:inline">Agendamento</span></Button></Link>
+          <Link href="/pacientes"><Button size="sm" variant="outline" className="gap-1.5 rounded-xl font-semibold text-xs h-9 border-gray-200"><UserPlus className="h-3.5 w-3.5" /><span className="hidden sm:inline">Paciente</span></Button></Link>
+          <Link href="/documentos"><Button size="sm" variant="outline" className="gap-1.5 rounded-xl font-semibold text-xs h-9 border-gray-200"><FileText className="h-3.5 w-3.5" /><span className="hidden sm:inline">Documento</span></Button></Link>
+          {canSeeFinancials && (<Link href="/financeiro"><Button size="sm" variant="outline" className="gap-1.5 rounded-xl font-semibold text-xs h-9 border-gray-200"><Receipt className="h-3.5 w-3.5" /><span className="hidden sm:inline">Financeiro</span></Button></Link>)}
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className={cn("grid gap-4 mb-8", canSeeFinancials ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-3")}>
-        {/* Revenue */}
-        {canSeeFinancials && (
-          <Card className="p-5 rounded-2xl border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-white relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-100 rounded-full opacity-40 group-hover:opacity-60 transition-opacity" />
-            <div className="relative">
-              <div className="flex items-start justify-between mb-3">
-                <div className="p-2.5 rounded-xl bg-emerald-100 shadow-sm">
-                  <TrendingUp className="h-5 w-5 text-emerald-600" />
-                </div>
-                {revenueChange !== 0 && (
-                  <span className={cn(
-                    "text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-0.5",
-                    revenueChange >= 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-                  )}>
-                    {revenueChange >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                    {revenueChange >= 0 ? "+" : ""}{revenueChange}%
-                  </span>
-                )}
-              </div>
-              <p className="text-[11px] font-bold text-emerald-600/70 uppercase tracking-widest mb-1">Faturamento do Mês</p>
-              <p className="text-[26px] font-extrabold text-gray-900 tracking-tight leading-none">{fmt(data?.monthlyRevenue || 0)}</p>
-              {data && data.monthlyExpenses > 0 && (
-                <p className="text-[11px] text-gray-400 mt-2">
-                  Lucro: <span className={cn("font-bold", data.netProfit >= 0 ? "text-emerald-600" : "text-red-500")}>{fmt(data.netProfit)}</span>
-                </p>
-              )}
-              <div className="mt-3 h-1.5 bg-emerald-100 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-700"
-                  style={{ width: `${Math.min((data?.monthlyRevenue || 0) / Math.max((data?.monthlyRevenue || 0) + (data?.monthlyExpenses || 1), 1) * 100, 100)}%` }}
-                />
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Patients */}
-        <Card className="p-5 rounded-2xl border-0 shadow-sm bg-gradient-to-br from-amber-50 to-white relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-amber-100 rounded-full opacity-40 group-hover:opacity-60 transition-opacity" />
-          <div className="relative">
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-2.5 rounded-xl bg-amber-100 shadow-sm">
-                <Users className="h-5 w-5 text-amber-600" />
-              </div>
-              {(data?.newPatientsThisMonth || 0) > 0 && (
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 flex items-center gap-0.5">
-                  <ArrowUpRight className="h-3 w-3" />
-                  +{data?.newPatientsThisMonth} novos
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Revenue Card */}
+        <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-blue-600 mb-1">Receita Mensal</p>
+              <p className="text-2xl font-bold text-gray-900">{data ? fmtShort(data.monthlyRevenue) : "R$ 0"}</p>
+              <div className="mt-2 flex items-center gap-1">
+                {revenueChange >= 0 ? <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" /> : <ArrowDownRight className="h-3.5 w-3.5 text-red-600" />}
+                <span className={cn("text-xs font-semibold", revenueChange >= 0 ? "text-emerald-600" : "text-red-600")}>
+                  {Math.abs(revenueChange)}% vs mês anterior
                 </span>
-              )}
+              </div>
             </div>
-            <p className="text-[11px] font-bold text-amber-600/70 uppercase tracking-widest mb-1">Pacientes Ativos</p>
-            <p className="text-[26px] font-extrabold text-gray-900 tracking-tight leading-none">{data?.activePatients || 0}</p>
-            <div className="mt-3 h-1.5 bg-amber-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-amber-300 to-amber-500 rounded-full transition-all duration-700"
-                style={{ width: `${Math.min((data?.activePatients || 0) * 10, 100)}%` }}
-              />
-            </div>
+            <div className="p-3 bg-blue-200 rounded-lg"><DollarSign className="h-6 w-6 text-blue-700" /></div>
           </div>
         </Card>
 
-        {/* Today Appointments */}
-        <Card className="p-5 rounded-2xl border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-100 rounded-full opacity-40 group-hover:opacity-60 transition-opacity" />
-          <div className="relative">
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-2.5 rounded-xl bg-blue-100 shadow-sm">
-                <Calendar className="h-5 w-5 text-blue-600" />
-              </div>
-              {occupationRate > 0 && (
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
-                  {occupationRate}% ocupação
-                </span>
-              )}
+        {/* Expenses Card */}
+        <Card className="p-6 bg-gradient-to-br from-red-50 to-red-100 border-0 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-red-600 mb-1">Despesas Mensais</p>
+              <p className="text-2xl font-bold text-gray-900">{data ? fmtShort(data.monthlyExpenses) : "R$ 0"}</p>
+              <p className="text-xs text-red-600 mt-2 font-medium">Este mês</p>
             </div>
-            <p className="text-[11px] font-bold text-blue-600/70 uppercase tracking-widest mb-1">Consultas Hoje</p>
-            <p className="text-[26px] font-extrabold text-gray-900 tracking-tight leading-none">{data?.todayAppointments || 0}</p>
-            {data && Object.keys(data.todayByStatus).length > 0 && (
-              <div className="mt-3 flex gap-1.5 flex-wrap">
-                {Object.entries(data.todayByStatus).map(([status, count]) => (
-                  <span key={status} className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", getStatusColor(status))}>
-                    {count} {getStatusLabel(status).toLowerCase()}
-                  </span>
-                ))}
-              </div>
-            )}
-            {(!data || Object.keys(data.todayByStatus).length === 0) && (
-              <div className="mt-3 h-1.5 bg-blue-100 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blue-300 to-blue-500 rounded-full" style={{ width: "0%" }} />
-              </div>
-            )}
+            <div className="p-3 bg-red-200 rounded-lg"><Banknote className="h-6 w-6 text-red-700" /></div>
           </div>
         </Card>
 
-        {/* Pendências */}
-        <Card className={cn(
-          "p-5 rounded-2xl border-0 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow",
-          (data?.pendencias || 0) > 0
-            ? "bg-gradient-to-br from-red-50 to-white border-l-4 border-l-red-500"
-            : "bg-gradient-to-br from-gray-50 to-white"
-        )}>
-          <div className={cn(
-            "absolute -right-4 -top-4 w-20 h-20 rounded-full opacity-40 group-hover:opacity-60 transition-opacity",
-            (data?.pendencias || 0) > 0 ? "bg-red-100" : "bg-gray-100"
-          )} />
-          <div className="relative">
-            <div className="flex items-start justify-between mb-3">
-              <div className={cn("p-2.5 rounded-xl shadow-sm", (data?.pendencias || 0) > 0 ? "bg-red-100" : "bg-gray-100")}>
-                <AlertCircle className={cn("h-5 w-5", (data?.pendencias || 0) > 0 ? "text-red-600" : "text-gray-400")} />
-              </div>
-              {(data?.pendencias || 0) > 0 && (
-                <span className="text-[11px] font-bold text-red-500 uppercase tracking-wide flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                  Atenção
-                </span>
-              )}
+        {/* Net Profit Card */}
+        <Card className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-0 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-emerald-600 mb-1">Lucro Líquido</p>
+              <p className="text-2xl font-bold text-gray-900">{data ? fmtShort(data.netProfit) : "R$ 0"}</p>
+              <p className="text-xs text-emerald-600 mt-2 font-medium">Este mês</p>
             </div>
-            <p className={cn("text-[11px] font-bold uppercase tracking-widest mb-1", (data?.pendencias || 0) > 0 ? "text-red-500/70" : "text-gray-400")}>
-              Pendências
-            </p>
-            <p className="text-[26px] font-extrabold text-gray-900 tracking-tight leading-none">{data?.pendencias || 0}</p>
-            {data && (data.overdueCount > 0 || data.pendingCount > 0) && (
-              <div className="mt-3 flex gap-2 text-[11px]">
-                {data.overdueCount > 0 && <span className="font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">{data.overdueCount} atrasados</span>}
-                {data.pendingCount > 0 && <span className="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{data.pendingCount} pendentes</span>}
+            <div className="p-3 bg-emerald-200 rounded-lg"><TrendingUp className="h-6 w-6 text-emerald-700" /></div>
+          </div>
+        </Card>
+
+        {/* Active Patients Card */}
+        <Card className="p-6 bg-gradient-to-br from-violet-50 to-violet-100 border-0 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-violet-600 mb-1">Pacientes Ativos</p>
+              <p className="text-2xl font-bold text-gray-900">{data?.activePatients || 0}</p>
+              <div className="mt-2 flex items-center gap-1">
+                <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" />
+                <span className="text-xs font-semibold text-emerald-600">{data ? data.newPatientsThisMonth : 0} novos</span>
               </div>
-            )}
-            {(data?.pendencias || 0) === 0 && (
-              <p className="text-[11px] text-emerald-500 font-semibold mt-3 flex items-center gap-1">
-                <Check className="h-3 w-3" /> Tudo em dia
-              </p>
-            )}
+            </div>
+            <div className="p-3 bg-violet-200 rounded-lg"><Users className="h-6 w-6 text-violet-700" /></div>
           </div>
         </Card>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-5 lg:space-y-6">
-          {/* Today Schedule */}
-          <Card className="overflow-hidden rounded-2xl border-0 shadow-sm">
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
-              <div>
-                <h2 className="text-base font-extrabold text-gray-900 tracking-tight">Agenda do Dia</h2>
-                <p className="text-[11px] text-gray-400 mt-0.5">{data?.todayAppointments || 0} consulta(s) agendada(s)</p>
-              </div>
-              <Link href="/agenda">
-                <Button variant="outline" size="sm" className="gap-1.5 text-[11px] rounded-xl font-semibold border-gray-200 h-8">
-                  Ver agenda
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-              </Link>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Today's Schedule */}
+        <div className="lg:col-span-2">
+          <Card className="p-6 shadow-sm border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900">Agenda de Hoje</h2>
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-0">{data?.todayAppointments || 0} agendamentos</Badge>
             </div>
-            <div className="divide-y divide-gray-50">
-              {(data?.todaySchedule || []).length === 0 ? (
-                <div className="text-center py-12 px-6">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="h-8 w-8 text-blue-300" />
-                  </div>
-                  <p className="text-sm font-semibold text-gray-400">Nenhuma consulta agendada para hoje</p>
-                  <p className="text-[11px] text-gray-300 mt-1 mb-3">Clique abaixo para agendar uma nova consulta</p>
-                  <Link href="/agenda">
-                    <Button size="sm" className="rounded-xl bg-blue-600 hover:bg-blue-700 text-[11px] font-semibold gap-1.5 h-8">
-                      <PlusCircle className="h-3.5 w-3.5" />
-                      Agendar consulta
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                data?.todaySchedule.map((apt) => (
-                  <div key={apt.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50/70 transition-colors">
-                    <div className="text-center w-14 flex-shrink-0">
-                      <p className="text-sm font-extrabold text-gray-900">{apt.time}</p>
-                      <p className="text-[10px] text-gray-300 font-medium">{apt.endTime}</p>
-                    </div>
-                    <div className={cn("w-1 h-10 rounded-full flex-shrink-0", getServiceColor(apt.service))} />
-                    <Avatar className="h-9 w-9 flex-shrink-0 shadow-sm">
-                      <AvatarFallback className="bg-blue-100 text-blue-700 text-[10px] font-extrabold">
-                        {apt.initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-bold text-gray-900 truncate">{apt.patient}</p>
-                      <p className="text-[11px] text-gray-400 truncate">{apt.service || "Consulta"}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <Badge className={cn("text-[10px] font-bold border-0 shadow-sm", getStatusColor(apt.status))}>
-                        {getStatusLabel(apt.status)}
-                      </Badge>
-                      {apt.phone && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-green-50"
-                          onClick={() => handleWhatsApp(apt.phone, apt.patient, `Olá ${apt.patient}! Lembramos da sua consulta hoje às ${apt.time}. Nos vemos em breve!`)}
-                          title="Lembrete via WhatsApp"
-                        >
-                          <MessageSquare className="h-3.5 w-3.5 text-green-600" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </Card>
 
-          {/* Revenue Chart + Payment Methods */}
-          {canSeeFinancials && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Daily Revenue */}
-              <Card className="p-5 rounded-2xl border-0 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2 tracking-tight">
-                    <div className="p-1.5 rounded-lg bg-blue-50">
-                      <BarChart3 className="h-4 w-4 text-blue-600" />
-                    </div>
-                    Faturamento Diário
-                  </h3>
-                  <span className="text-[10px] text-gray-300 font-semibold uppercase tracking-wider">7 dias</span>
-                </div>
-                {(data?.dailyRevenue || []).every(d => d.total === 0) ? (
-                  <div className="flex flex-col items-center justify-center h-32">
-                    <div className="flex items-end gap-1.5 mb-3">
-                      {[20, 45, 30, 60, 35, 50, 40].map((h, i) => (
-                        <div key={i} className="w-5 bg-gray-100 rounded-t-md animate-pulse" style={{ height: `${h}%`, animationDelay: `${i * 100}ms` }} />
-                      ))}
-                    </div>
-                    <p className="text-[11px] text-gray-300 font-medium">Sem faturamento registrado</p>
-                  </div>
-                ) : (
-                  <div className="flex items-end gap-2 h-32">
-                    {(data?.dailyRevenue || []).map((day) => {
-                      const height = maxDailyRevenue > 0 ? Math.max((day.total / maxDailyRevenue) * 100, 6) : 6
-                      const isToday = day.date === new Date().toISOString().split("T")[0]
-                      return (
-                        <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5 group/bar">
-                          <span className="text-[9px] text-gray-400 font-bold opacity-0 group-hover/bar:opacity-100 transition-opacity">
-                            {day.total > 0 ? fmtShort(day.total) : "—"}
-                          </span>
-                          <div className="w-full relative">
-                            <div
-                              className={cn(
-                                "w-full rounded-lg transition-all duration-500 group-hover/bar:opacity-90",
-                                isToday
-                                  ? "bg-gradient-to-t from-blue-600 to-blue-400 shadow-sm shadow-blue-200"
-                                  : day.total > 0
-                                    ? "bg-gradient-to-t from-blue-200 to-blue-100"
-                                    : "bg-gray-100"
-                              )}
-                              style={{ height: `${height}px` }}
-                            />
-                          </div>
-                          <span className={cn(
-                            "text-[10px] font-bold",
-                            isToday ? "text-blue-600" : "text-gray-300"
-                          )}>
-                            {day.label}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </Card>
-
-              {/* Payment Methods */}
-              <Card className="p-5 rounded-2xl border-0 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2 tracking-tight">
-                    <div className="p-1.5 rounded-lg bg-violet-50">
-                      <Wallet className="h-4 w-4 text-violet-600" />
-                    </div>
-                    Pagamentos
-                  </h3>
-                  <span className="text-[10px] text-gray-300 font-semibold uppercase tracking-wider">Mês</span>
-                </div>
-                {(data?.paymentMethods || []).length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32">
-                    <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center mb-3">
-                      <CreditCard className="h-6 w-6 text-violet-200" />
-                    </div>
-                    <p className="text-[11px] text-gray-300 font-medium">Sem dados este mês</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3.5">
-                    {data?.paymentMethods.slice(0, 4).map((pm, idx) => {
-                      const total = data.paymentMethods.reduce((s, p) => s + p.total, 0)
-                      const pctWidth = total > 0 ? (pm.total / total) * 100 : 0
-                      const MethodIcon = getMethodIcon(pm.method)
-                      return (
-                        <div key={pm.method}>
-                          <div className="flex justify-between items-center text-[11px] mb-1.5">
-                            <span className="font-bold text-gray-700 flex items-center gap-1.5">
-                              <MethodIcon className="h-3.5 w-3.5 text-gray-400" />
-                              {pm.method}
-                            </span>
-                            <span className="text-gray-400 font-semibold">{fmt(pm.total)}</span>
-                          </div>
-                          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                              className={cn("h-full rounded-full transition-all duration-700", methodColors[idx % methodColors.length])}
-                              style={{ width: `${pctWidth}%` }}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </Card>
-            </div>
-          )}
-
-          {/* Pending Payments */}
-          {canSeeFinancials && (
-            <Card className="overflow-hidden rounded-2xl border-0 shadow-sm">
-              <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
-                <h2 className="text-base font-extrabold text-gray-900 tracking-tight">Pagamentos Pendentes</h2>
-                <Link href="/pagamentos">
-                  <Button variant="link" size="sm" className="text-[11px] gap-1 font-semibold text-blue-600">
-                    Ver todos <ExternalLink className="h-3 w-3" />
-                  </Button>
-                </Link>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left text-[10px] font-bold text-gray-300 uppercase tracking-widest px-6 py-3">Paciente</th>
-                      <th className="text-left text-[10px] font-bold text-gray-300 uppercase tracking-widest py-3">Valor</th>
-                      <th className="text-left text-[10px] font-bold text-gray-300 uppercase tracking-widest py-3">Vencimento</th>
-                      <th className="text-left text-[10px] font-bold text-gray-300 uppercase tracking-widest py-3">Status</th>
-                      <th className="text-right text-[10px] font-bold text-gray-300 uppercase tracking-widest px-6 py-3">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(data?.pendingPayments || []).length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-10 text-center">
-                          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-                            <Check className="h-7 w-7 text-emerald-300" />
-                          </div>
-                          <p className="text-sm font-semibold text-gray-300">Nenhum pagamento pendente</p>
-                          <p className="text-[11px] text-gray-200 mt-0.5">Todos os pagamentos estão em dia</p>
-                        </td>
-                      </tr>
-                    ) : (
-                      data?.pendingPayments.map((p) => (
-                        <tr key={p.id} className={cn("border-b border-gray-50 hover:bg-gray-50/50 transition-colors", p.status === "overdue" && "bg-red-50/30")}>
-                          <td className="px-6 py-3.5">
-                            <div className="flex items-center gap-2.5">
-                              <Avatar className="h-8 w-8 shadow-sm">
-                                <AvatarFallback className="bg-gray-100 text-gray-600 text-[10px] font-extrabold">{p.initials}</AvatarFallback>
-                              </Avatar>
-                              <span className="text-[13px] font-bold text-gray-900">{p.patient}</span>
-                            </div>
-                          </td>
-                          <td className="py-3.5 text-[13px] font-extrabold text-gray-900">{fmt(p.amount)}</td>
-                          <td className="py-3.5 text-[12px] text-gray-500 font-medium">{fmtDate(p.dueDate)}</td>
-                          <td className="py-3.5">
-                            <Badge className={cn("text-[10px] font-bold border-0 shadow-sm", p.status === "overdue" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700")}>
-                              {p.status === "overdue" ? "Atrasado" : "Pendente"}
-                            </Badge>
-                          </td>
-                          <td className="px-6 py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              {p.phone && (
-                                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-green-50"
-                                  onClick={() => handleWhatsApp(p.phone, p.patient, `Olá ${p.patient}! Passando para lembrar do pagamento pendente no valor de ${fmt(p.amount)}. Podemos ajudar com alguma forma de pagamento?`)}
-                                  title="Cobrar via WhatsApp"
-                                >
-                                  <MessageSquare className="h-3.5 w-3.5 text-green-600" />
-                                </Button>
-                              )}
-                              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-emerald-50"
-                                onClick={() => markPaid(p.id)} title="Marcar como pago"
-                              >
-                                <Check className="h-3.5 w-3.5 text-emerald-600" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          )}
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-5 lg:space-y-6">
-          {/* Financial Summary */}
-          {canSeeFinancials && (
-            <Card className="p-5 rounded-2xl border-0 shadow-sm">
-              <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2 mb-5 tracking-tight">
-                <div className="p-1.5 rounded-lg bg-emerald-50">
-                  <DollarSign className="h-4 w-4 text-emerald-600" />
-                </div>
-                Resumo Financeiro
-              </h3>
-              <div className="space-y-3.5">
-                <div className="flex justify-between items-center">
-                  <span className="text-[12px] text-gray-400 font-medium">Receitas</span>
-                  <span className="text-[13px] font-extrabold text-emerald-600">{fmt(data?.monthlyRevenue || 0)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[12px] text-gray-400 font-medium">Despesas</span>
-                  <span className="text-[13px] font-extrabold text-red-500">{fmt(data?.monthlyExpenses || 0)}</span>
-                </div>
-                <div className="h-px bg-gray-100" />
-                <div className="flex justify-between items-center py-1 px-3 rounded-xl bg-gray-50">
-                  <span className="text-[12px] font-bold text-gray-700">Lucro Líquido</span>
-                  <span className={cn("text-[14px] font-extrabold", (data?.netProfit || 0) >= 0 ? "text-emerald-600" : "text-red-600")}>
-                    {fmt(data?.netProfit || 0)}
-                  </span>
-                </div>
-                <div className="h-px bg-gray-100" />
-                <div className="flex justify-between items-center">
-                  <span className="text-[12px] text-gray-400 font-medium">Pendente</span>
-                  <span className="text-[13px] font-extrabold text-amber-600">{fmt(data?.pendingTotal || 0)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[12px] text-gray-400 font-medium">Em atraso</span>
-                  <span className="text-[13px] font-extrabold text-red-600">{fmt(data?.overdueTotal || 0)}</span>
-                </div>
-              </div>
-              <Link href="/financeiro">
-                <Button variant="outline" size="sm" className="w-full mt-5 text-[11px] gap-1.5 rounded-xl font-bold border-gray-200 h-9">
-                  <Wallet className="h-3.5 w-3.5" />
-                  Ver relatório completo
-                </Button>
-              </Link>
-            </Card>
-          )}
-
-          {/* Occupation */}
-          <Card className="p-5 rounded-2xl border-0 shadow-sm">
-            <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2 mb-4 tracking-tight">
-              <div className="p-1.5 rounded-lg bg-blue-50">
-                <Target className="h-4 w-4 text-blue-600" />
-              </div>
-              Ocupação da Semana
-            </h3>
-            <div className="flex items-center gap-5">
-              <div className="relative w-[72px] h-[72px]">
-                <svg className="w-[72px] h-[72px] -rotate-90" viewBox="0 0 36 36">
-                  <path className="text-gray-100" stroke="currentColor" strokeWidth="3.5" fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path
-                    className={cn(
-                      occupationRate >= 75 ? "text-emerald-500" : occupationRate >= 40 ? "text-blue-500" : "text-amber-400"
-                    )}
-                    stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" fill="none"
-                    strokeDasharray={`${occupationRate}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    style={{ transition: "stroke-dasharray 0.8s ease" }}
-                  />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[15px] font-extrabold text-gray-900">
-                  {occupationRate}%
-                </span>
-              </div>
-              <div>
-                <p className="text-[14px] font-extrabold text-gray-900">{data?.weekAppointments || 0} consultas</p>
-                <p className="text-[11px] text-gray-300 font-medium">de {data?.weekSlots || 0} slots disponíveis</p>
-                <p className={cn(
-                  "text-[11px] font-bold mt-1",
-                  occupationRate >= 75 ? "text-emerald-500" : occupationRate >= 40 ? "text-blue-500" : "text-amber-500"
-                )}>
-                  {occupationRate >= 75 ? "Excelente" : occupationRate >= 40 ? "Bom ritmo" : "Horários livres"}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card className="p-5 rounded-2xl border-0 shadow-sm">
-            <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2 mb-4 tracking-tight">
-              <div className="p-1.5 rounded-lg bg-violet-50">
-                <Activity className="h-4 w-4 text-violet-600" />
-              </div>
-              Atividade Recente
-            </h3>
-            {(data?.recentActivity || []).length === 0 ? (
-              <div className="text-center py-6">
-                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-3">
-                  <Sparkles className="h-6 w-6 text-gray-200" />
-                </div>
-                <p className="text-[11px] text-gray-300 font-medium">Nenhuma atividade recente</p>
-                <p className="text-[10px] text-gray-200 mt-0.5">As atividades aparecerão aqui automaticamente</p>
-              </div>
-            ) : (
+            {data?.todaySchedule && data.todaySchedule.length > 0 ? (
               <div className="space-y-3">
-                {data?.recentActivity.slice(0, 6).map((act, i) => {
-                  const Icon = act.icon === "calendar" ? Calendar : act.icon === "file" ? FileText : DollarSign
-                  const colors = act.icon === "calendar" ? "text-blue-600 bg-blue-50" : act.icon === "file" ? "text-violet-600 bg-violet-50" : "text-emerald-600 bg-emerald-50"
-                  return (
-                    <div key={i} className="flex gap-3 items-start">
-                      <div className={cn("p-1.5 rounded-lg flex-shrink-0 shadow-sm", colors)}>
-                        <Icon className="h-3.5 w-3.5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] text-gray-600 leading-relaxed truncate font-medium">{act.text}</p>
-                        <p className="text-[10px] text-gray-300 mt-0.5 font-medium">{getTimeAgo(act.time)}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </Card>
-
-          {/* Birthdays */}
-          {(data?.birthdays || []).length > 0 && (
-            <Card className="p-5 rounded-2xl border-0 shadow-sm bg-gradient-to-br from-pink-50 via-amber-50/50 to-white">
-              <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2 mb-4 tracking-tight">
-                <div className="p-1.5 rounded-lg bg-pink-100">
-                  <Cake className="h-4 w-4 text-pink-500" />
-                </div>
-                Aniversariantes
-              </h3>
-              <div className="space-y-2.5">
-                {data?.birthdays.slice(0, 5).map((b) => {
-                  const isToday = b.day === new Date().getDate()
-                  return (
-                    <div key={b.id} className={cn("flex items-center gap-3 p-2.5 rounded-xl transition-all", isToday && "bg-white shadow-sm")}>
-                      <Avatar className="h-8 w-8 shadow-sm">
-                        <AvatarFallback className="bg-pink-100 text-pink-700 text-[10px] font-extrabold">{b.initials}</AvatarFallback>
+                {data.todaySchedule.map((apt) => (
+                  <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center gap-3 flex-1">
+                      <Avatar className="h-8 w-8 bg-gradient-to-br from-blue-400 to-blue-600">
+                        <AvatarFallback className="text-white text-xs font-bold">{apt.initials}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-bold text-gray-900 truncate">
-                          {b.name}
-                          {isToday && <span className="ml-1.5 text-pink-500 animate-pulse">Hoje!</span>}
-                        </p>
-                        <p className="text-[10px] text-gray-400 font-medium">Dia {b.day}</p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">{apt.patient}</p>
+                        <p className="text-xs text-gray-500">{apt.time} - {apt.endTime}</p>
                       </div>
-                      {b.phone && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-green-50"
-                          onClick={() => handleWhatsApp(b.phone, b.name, `Olá ${b.name}! A equipe da clínica deseja um feliz aniversário! Esperamos que tenha um dia especial!`)}
-                        >
-                          <MessageSquare className="h-3.5 w-3.5 text-green-600" />
-                        </Button>
-                      )}
+                      <div className={cn("px-2.5 py-1 rounded-full text-xs font-semibold", getStatusColor(apt.status))}>{getStatusLabel(apt.status)}</div>
                     </div>
-                  )
-                })}
+                    <Button size="sm" variant="ghost" className="ml-2" onClick={() => handleWhatsApp(apt.phone, apt.patient, `Olá ${apt.patient}, tudo bem? Confirma sua consulta de ${apt.service} às ${apt.time}?`)}>
+                      <MessageSquare className="h-4 w-4 text-blue-600" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-            </Card>
-          )}
-
-          {/* System Status */}
-          <Card className="p-4 rounded-2xl border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100/30">
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest">Sistema Ativo</span>
-            </div>
-            <p className="text-[11px] text-emerald-700/70 font-medium leading-relaxed">
-              Dados sincronizados em tempo real. Qualquer alteração será refletida automaticamente.
-            </p>
+            ) : (
+              <p className="text-sm text-gray-500 text-center py-8">Sem agendamentos para hoje</p>
+            )}
           </Card>
         </div>
+
+        {/* Occupation Rate */}
+        <Card className="p-6 shadow-sm border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Taxa de Ocupação</h2>
+          <div className="flex flex-col items-center justify-center py-4">
+            <div className="relative w-32 h-32 mb-4">
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" strokeWidth="8" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="8"
+                  strokeDasharray={`${(occupationRate / 100) * 283} 283`}
+                  strokeLinecap="round"
+                  transform="rotate(-90 50 50)"
+                />
+                <text x="50" y="50" textAnchor="middle" dy=".3em" className="text-2xl font-bold fill-gray-900">
+                  {occupationRate}%
+                </text>
+              </svg>
+            </div>
+            <p className="text-sm text-gray-600 text-center">
+              {data?.weekAppointments || 0} de {data?.weekSlots || 0} slots esta semana
+            </p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Charts and Financial Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Daily Revenue Chart */}
+        <Card className="p-6 shadow-sm border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Receita Diária (7 dias)</h2>
+          {data?.dailyRevenue && data.dailyRevenue.length > 0 ? (
+            <div className="space-y-2">
+              {data.dailyRevenue.map((day, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="w-16 text-xs font-medium text-gray-600 truncate">{day.label}</span>
+                  <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all"
+                      style={{ width: `${(day.total / maxDailyRevenue) * 100}%` }}
+                    />
+                  </div>
+                  <span className="w-16 text-xs font-semibold text-gray-900 text-right">{fmtShort(day.total)}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-8">Sem dados de receita</p>
+          )}
+        </Card>
+
+        {/* Payment Methods */}
+        <Card className="p-6 shadow-sm border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Meios de Pagamento</h2>
+          {data?.paymentMethods && data.paymentMethods.length > 0 ? (
+            <div className="space-y-3">
+              {data.paymentMethods.map((method, idx) => {
+                const Icon = getMethodIcon(method.method)
+                return (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className={cn("p-2 rounded-lg text-white", methodColors[idx % methodColors.length])}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{method.method}</p>
+                      <p className="text-xs text-gray-500">{fmt(method.total)}</p>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-900">{Math.round((method.total / (data.monthlyRevenue || 1)) * 100)}%</span>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-8">Sem métodos registrados</p>
+          )}
+        </Card>
+      </div>
+
+      {/* Financial Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Pending Payments */}
+        <Card className="p-6 shadow-sm border-gray-100 bg-amber-50">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-600" />
+              <h2 className="text-lg font-bold text-gray-900">Pagamentos Pendentes</h2>
+            </div>
+            <Badge className="bg-amber-200 text-amber-800 border-0">{data?.pendingCount || 0}</Badge>
+          </div>
+          <p className="text-2xl font-bold text-gray-900 mb-2">{data ? fmt(data.pendingTotal) : "R$ 0"}</p>
+          <p className="text-sm text-gray-600 mb-4">em {data?.pendingCount || 0} transação(ões)</p>
+          <Link href="/financeiro">
+            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white gap-2">
+              Ver Detalhes <ExternalLink className="h-4 w-4" />
+            </Button>
+          </Link>
+        </Card>
+
+        {/* Overdue Payments */}
+        <Card className="p-6 shadow-sm border-gray-100 bg-red-50">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <h2 className="text-lg font-bold text-gray-900">Pagamentos Atrasados</h2>
+            </div>
+            <Badge className="bg-red-200 text-red-800 border-0">{data?.overdueCount || 0}</Badge>
+          </div>
+          <p className="text-2xl font-bold text-gray-900 mb-2">{data ? fmt(data.overdueTotal) : "R$ 0"}</p>
+          <p className="text-sm text-gray-600 mb-4">em {data?.overdueCount || 0} transação(ões)</p>
+          <Link href="/financeiro">
+            <Button className="w-full bg-red-600 hover:bg-red-700 text-white gap-2">
+              Ver Detalhes <ExternalLink className="h-4 w-4" />
+            </Button>
+          </Link>
+        </Card>
+      </div>
+
+      {/* Pending Payments Table */}
+      {data?.pendingPayments && data.pendingPayments.length > 0 && (
+        <Card className="p-6 shadow-sm border-gray-100 mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Últimos Pagamentos Pendentes</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Paciente</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Descrição</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Valor</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Vencimento</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.pendingPayments.slice(0, 5).map((payment) => (
+                  <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-7 w-7 bg-gradient-to-br from-blue-400 to-blue-600">
+                          <AvatarFallback className="text-white text-xs font-bold">{payment.initials}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-gray-900">{payment.patient}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">{payment.description}</td>
+                    <td className="py-3 px-4 font-semibold text-gray-900">{fmt(payment.amount)}</td>
+                    <td className="py-3 px-4 text-gray-600">{fmtDate(payment.dueDate)}</td>
+                    <td className="py-3 px-4">
+                      <Badge className={cn("border-0", getStatusColor(payment.status))}>{getStatusLabel(payment.status)}</Badge>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex gap-2">
+                        {payment.status === "pending" && (
+                          <>
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markPaid(payment.id)}>
+                              <Check className="h-3 w-3 mr-1" /> Marcar Pago
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 text-xs text-blue-600" onClick={() => handleWhatsApp(payment.phone, payment.patient, `Olá ${payment.patient}, você tem um pagamento pendente de ${fmt(payment.amount)} vencido em ${fmtDate(payment.dueDate)}.`)}>
+                              <MessageSquare className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {/* Recent Activity & Birthdays */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activity */}
+        <Card className="p-6 shadow-sm border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Atividade Recente</h2>
+          {data?.recentActivity && data.recentActivity.length > 0 ? (
+            <div className="space-y-3">
+              {data.recentActivity.map((activity, idx) => {
+                const iconMap: Record<string, any> = {
+                  appointment: Calendar, payment: DollarSign, patient: Users,
+                  document: FileText, system: Zap, other: Activity,
+                }
+                const Icon = iconMap[activity.icon] || Activity
+                return (
+                  <div key={idx} className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-50 rounded-lg mt-0.5">
+                      <Icon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{activity.text}</p>
+                      <p className="text-xs text-gray-500">{getTimeAgo(activity.time)}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-8">Sem atividade recente</p>
+          )}
+        </Card>
+
+        {/* Birthdays */}
+        <Card className="p-6 shadow-sm border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Próximos Aniversários</h2>
+          {data?.birthdays && data.birthdays.length > 0 ? (
+            <div className="space-y-3">
+              {data.birthdays.map((birthday) => (
+                <div key={birthday.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-rose-200 rounded-lg">
+                      <Cake className="h-4 w-4 text-rose-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-900">{birthday.name}</p>
+                      <p className="text-xs text-gray-500">em {birthday.day} dias</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="ghost" className="text-pink-600" onClick={() => handleWhatsApp(birthday.phone, birthday.name, `Olá ${birthday.name}! Gostaríamos de desejar um feliz aniversário! 🎉`)}>
+                    <MessageSquare className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-8">Sem aniversários próximos</p>
+          )}
+        </Card>
       </div>
     </CRMLayout>
   )
