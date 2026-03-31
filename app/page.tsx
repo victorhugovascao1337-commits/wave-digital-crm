@@ -213,11 +213,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
         {/* Revenue Card */}
         <Link href="/financeiro" className="block">
-          <Card className="p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+          <Card className="p-5 bg-gradient-to-br from-emerald-50 to-emerald-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs font-medium text-blue-600 mb-1">Receita Mensal</p>
-                <p className="text-xl font-bold text-gray-900">{data ? fmtShort(data.monthlyRevenue) : "R$ 0"}</p>
+                <p className="text-xs font-medium text-emerald-600 mb-1">Faturamento Mensal</p>
+                <p className="text-xl font-bold text-gray-900">{data ? fmt(data.monthlyRevenue) : "R$ 0,00"}</p>
                 <div className="mt-1.5 flex items-center gap-1">
                   {revenueChange >= 0 ? <ArrowUpRight className="h-3 w-3 text-emerald-600" /> : <ArrowDownRight className="h-3 w-3 text-red-600" />}
                   <span className={cn("text-[10px] font-semibold", revenueChange >= 0 ? "text-emerald-600" : "text-red-600")}>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
               </div>
-              <div className="p-2 bg-blue-200 rounded-lg"><DollarSign className="h-5 w-5 text-blue-700" /></div>
+              <div className="p-2 bg-emerald-200 rounded-lg"><DollarSign className="h-5 w-5 text-emerald-700" /></div>
             </div>
           </Card>
         </Link>
