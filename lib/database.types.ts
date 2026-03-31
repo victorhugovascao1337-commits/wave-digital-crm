@@ -86,6 +86,42 @@ export interface Anamnesis {
   patient?: Patient
 }
 
+export interface ClinicalDocument {
+  id: string
+  patient_id: string
+  professional_id: string | null
+  document_type: 'prescription' | 'certificate_attendance' | 'certificate_medical' | 'referral'
+  title: string | null
+  content: string | null
+  diagnosis: string | null
+  cid_code: string | null
+  days_off: number | null
+  date_start: string | null
+  date_end: string | null
+  referred_to: string | null
+  referred_specialty: string | null
+  medications: Medication[]
+  notes: string | null
+  clinic_name: string | null
+  clinic_address: string | null
+  clinic_phone: string | null
+  clinic_logo_url: string | null
+  professional_name: string | null
+  professional_credentials: string | null
+  signature_image_url: string | null
+  created_at: string
+  updated_at: string
+  patient?: Patient
+}
+
+export interface Medication {
+  name: string
+  dosage: string
+  frequency: string
+  duration: string
+  instructions: string
+}
+
 export interface Service {
   id: string
   name: string

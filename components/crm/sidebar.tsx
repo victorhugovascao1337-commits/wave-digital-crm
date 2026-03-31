@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   FileText,
+  FileSignature,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
@@ -28,6 +29,8 @@ const navItems = [
   { href: "/", label: "Painel", icon: LayoutDashboard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/pacientes", label: "Pacientes", icon: Users, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/prontuario", label: "Prontuário", icon: FileText, roles: ["admin", "superadmin", "doctor"] },
+  { href: "/anamnese", label: "Anamnese", icon: ClipboardList, roles: ["admin", "superadmin", "doctor"] },
+  { href: "/documentos", label: "Documentos", icon: FileSignature, roles: ["admin", "superadmin", "doctor"] },
   { href: "/agenda", label: "Agenda", icon: Calendar, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/pagamentos", label: "Pagamentos", icon: CreditCard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/tarefas", label: "Tarefas", icon: ClipboardList, roles: ["admin", "superadmin", "doctor", "receptionist"] },
