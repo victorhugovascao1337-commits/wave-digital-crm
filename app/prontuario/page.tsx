@@ -89,25 +89,20 @@ export default function ProntuarioPage() {
 
   return (
     <CRMLayout>
-      <div className="px-4 py-6 max-w-7xl mx-auto">
+      <div className="px-4 py-6">
         {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg shadow-blue-500/20">
-                <Activity className="h-5 w-5 text-white" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                Prontuário Eletrônico
-              </h2>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1 ml-12">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+              Prontuário Eletrônico
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
               Registros clínicos com editor avançado, templates e exportação PDF.
             </p>
           </div>
           <button
             onClick={() => setNewRecordModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-[1.02] transition-all text-sm"
+            className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-b from-primary to-primary/90 text-white font-semibold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform text-sm"
           >
             <Plus className="h-4 w-4" />
             Novo Registro
@@ -116,62 +111,63 @@ export default function ProntuarioPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-blue-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-blue-100/50" />
+            <div className="relative flex items-center gap-3">
+              <div className="p-2.5 bg-blue-100 rounded-xl">
                 <FileText className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Total</p>
+                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.total}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total</p>
               </div>
             </div>
           </div>
-
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                <Stethoscope className="h-5 w-5 text-green-600" />
+          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-emerald-100/50" />
+            <div className="relative flex items-center gap-3">
+              <div className="p-2.5 bg-emerald-100 rounded-xl">
+                <Stethoscope className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.consultations}</p>
-                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Consultas</p>
+                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.consultations}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Consultas</p>
               </div>
             </div>
           </div>
-
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
-                <TrendingUp className="h-5 w-5 text-purple-600" />
+          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-violet-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-violet-100/50" />
+            <div className="relative flex items-center gap-3">
+              <div className="p-2.5 bg-violet-100 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-violet-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.evolutions}</p>
-                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Evoluções</p>
+                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.evolutions}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Evoluções</p>
               </div>
             </div>
           </div>
-
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl">
+          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-amber-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-amber-100/50" />
+            <div className="relative flex items-center gap-3">
+              <div className="p-2.5 bg-amber-100 rounded-xl">
                 <Pill className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.prescriptions}</p>
-                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Prescrições</p>
+                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.prescriptions}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Prescrições</p>
               </div>
             </div>
           </div>
-
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl">
+          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-cyan-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
+            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-cyan-100/50" />
+            <div className="relative flex items-center gap-3">
+              <div className="p-2.5 bg-cyan-100 rounded-xl">
                 <Activity className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.todayCount}</p>
-                <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Hoje</p>
+                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.todayCount}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Hoje</p>
               </div>
             </div>
           </div>
@@ -180,15 +176,14 @@ export default function ProntuarioPage() {
         {/* Search + Filters */}
         <div className="mb-6 space-y-3">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
-              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm font-medium outline-none shadow-sm"
+              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all text-sm font-medium outline-none shadow-sm"
               placeholder="Buscar por título, diagnóstico, conteúdo ou nome do paciente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
           <div className="flex gap-2 items-center flex-wrap">
             {recordTypeFilters.map((filter) => {
               const Icon = filter.icon
@@ -196,10 +191,10 @@ export default function ProntuarioPage() {
                 <button
                   key={filter.value}
                   onClick={() => setTypeFilter(filter.value)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     typeFilter === filter.value
-                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-blue-600/15"
-                      : "bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700"
+                      ? "bg-primary text-white shadow-md shadow-primary/15"
+                      : "bg-white text-muted-foreground border border-gray-200 hover:border-gray-300 hover:text-gray-700"
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -214,7 +209,26 @@ export default function ProntuarioPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Spinner className="h-8 w-8" />
-            <p className="text-sm text-gray-500">Carregando registros...</p>
+            <p className="text-sm text-muted-foreground">Carregando registros...</p>
+          </div>
+        ) : filteredRecords.length === 0 && !searchTerm && typeFilter === "all" ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="p-4 bg-blue-50 rounded-2xl">
+              <FileText className="h-10 w-10 text-blue-400" />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold text-foreground">Nenhum registro encontrado</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Comece criando seu primeiro registro clínico.
+              </p>
+            </div>
+            <button
+              onClick={() => setNewRecordModalOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-b from-primary to-primary/90 text-white font-semibold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform text-sm"
+            >
+              <Plus className="h-4 w-4" />
+              Novo Registro
+            </button>
           </div>
         ) : (
           <MedicalRecordList
