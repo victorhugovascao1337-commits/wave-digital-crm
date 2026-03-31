@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server"
 
 // ONE-TIME endpoint to fix the appointments CHECK constraint
-// Deploy, access once via browser, then delete this file
+// Deploy, access via browser GET, then delete this file
 
 const ALTER_SQL = `
 DO $$
 BEGIN
-  -- Drop old constraint if exists
   IF EXISTS (
     SELECT 1 FROM pg_constraint WHERE conname = 'appointments_status_check'
   ) THEN
     ALTER TABLE public.appointments DROP CONSTRAINT appointments_status_check;
   END IF;
-
-  -- Add new constraint with ALL status values
   ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check
     CHECK (status IN (
       'PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO',
@@ -22,57 +19,97 @@ BEGIN
 END $$;
 `
 
+// Extract project ref from Supabase URL
+function getProjectRef(): string | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+  const match = url.match(/https:\/\/([^.]+)\.supabase\.co/)
+  return match ? match[1] : null
+}
+
+// Method 1: Direct PostgreSQL via env vars
 async function tryDirectPostgres(): Promise<{ success: boolean; method?: string; error?: string }> {
-  // Try POSTGRES_URL, DATABASE_URL, or construct from individual vars
   const connString =
     process.env.POSTGRES_URL_NON_POOLING ||
     process.env.POSTGRES_URL ||
     process.env.DATABASE_URL ||
     null
 
-  if (connString) {
-    try {
-      // Dynamic import - pg may or may not be available
-      const { Pool } = await import("pg")
-      const pool = new Pool({ connectionString: connString, ssl: { rejectUnauthorized: false } })
-      await pool.query(ALTER_SQL)
-      await pool.end()
-      return { success: true, method: "pg direct connection" }
-    } catch (e: any) {
-      return { success: false, error: `pg connection failed: ${e.message}` }
-    }
+  if (!connString) return { success: false, error: "No POSTGRES_URL env var" }
+
+  try {
+    const { Pool } = await import("pg")
+    const pool = new Pool({ connectionString: connString, ssl: { rejectUnauthorized: false } })
+    await pool.query(ALTER_SQL)
+    await pool.end()
+    return { success: true, method: "direct_postgres" }
+  } catch (e: any) {
+    return { success: false, error: `pg: ${e.message}` }
   }
-  return { success: false, error: "No POSTGRES_URL or DATABASE_URL found" }
 }
 
-async function trySupabaseHttp(): Promise<{ success: boolean; method?: string; error?: string }> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+// Method 2: Connect via Supabase Pooler using JWT auth (service_role as password)
+async function tryPoolerJwt(): Promise<{ success: boolean; method?: string; error?: string }> {
+  const ref = getProjectRef()
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!ref || !serviceKey) return { success: false, error: "Missing ref or service key" }
 
-  if (!supabaseUrl || !serviceKey) {
-    return { success: false, error: "Missing SUPABASE_URL or SERVICE_ROLE_KEY" }
-  }
-
-  // Try the Supabase SQL endpoint (available in newer Supabase versions)
-  const endpoints = [
-    `${supabaseUrl}/rest/v1/rpc/exec_sql`,
-    `${supabaseUrl}/pg/query`,
+  // Try multiple pooler regions and ports
+  const regions = ["us-east-1", "sa-east-1", "us-west-1", "eu-west-1", "ap-southeast-1"]
+  const configs = [
+    // Transaction mode (port 6543)
+    ...regions.map(r => ({ host: `aws-0-${r}.pooler.supabase.com`, port: 6543 })),
+    // Session mode (port 5432)
+    ...regions.map(r => ({ host: `aws-0-${r}.pooler.supabase.com`, port: 5432 })),
+    // Direct connection
+    { host: `db.${ref}.supabase.co`, port: 5432 },
   ]
 
-  for (const endpoint of endpoints) {
+  const errors: string[] = []
+
+  for (const { host, port } of configs) {
     try {
-      const res = await fetch(endpoint, {
+      const connStr = `postgresql://postgres.${ref}:${encodeURIComponent(serviceKey)}@${host}:${port}/postgres?sslmode=require`
+      const { Pool } = await import("pg")
+      const pool = new Pool({
+        connectionString: connStr,
+        ssl: { rejectUnauthorized: false },
+        connectionTimeoutMillis: 5000,
+      })
+      await pool.query(ALTER_SQL)
+      await pool.end()
+      return { success: true, method: `pooler_jwt ${host}:${port}` }
+    } catch (e: any) {
+      errors.push(`${host}:${port} → ${e.message?.substring(0, 80)}`)
+    }
+  }
+
+  return { success: false, error: `Pooler JWT failed: ${errors.join(" | ")}` }
+}
+
+// Method 3: Supabase HTTP SQL endpoints
+async function tryHttpSql(): Promise<{ success: boolean; method?: string; error?: string }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceKey) return { success: false, error: "Missing URL or key" }
+
+  const endpoints = [
+    { url: `${supabaseUrl}/pg/query`, body: { query: ALTER_SQL } },
+    { url: `${supabaseUrl}/rest/v1/rpc/exec_sql`, body: { query: ALTER_SQL } },
+    { url: `${supabaseUrl}/rest/v1/rpc/execute_sql`, body: { sql: ALTER_SQL } },
+  ]
+
+  for (const { url, body } of endpoints) {
+    try {
+      const res = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           apikey: serviceKey,
           Authorization: `Bearer ${serviceKey}`,
         },
-        body: JSON.stringify({ query: ALTER_SQL }),
+        body: JSON.stringify(body),
       })
-      if (res.ok) {
-        return { success: true, method: `HTTP ${endpoint}` }
-      }
+      if (res.ok) return { success: true, method: `http ${url}` }
     } catch {
       continue
     }
@@ -82,80 +119,43 @@ async function trySupabaseHttp(): Promise<{ success: boolean; method?: string; e
 }
 
 export async function GET() {
-  // Step 1: Report what env vars are available (names only, no values)
   const envCheck = {
     POSTGRES_URL: !!process.env.POSTGRES_URL,
     POSTGRES_URL_NON_POOLING: !!process.env.POSTGRES_URL_NON_POOLING,
     DATABASE_URL: !!process.env.DATABASE_URL,
     NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
     SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    SUPABASE_DB_URL: !!process.env.SUPABASE_DB_URL,
-    POSTGRES_HOST: !!process.env.POSTGRES_HOST,
-    POSTGRES_PASSWORD: !!process.env.POSTGRES_PASSWORD,
+    projectRef: getProjectRef(),
   }
 
-  // Step 2: Try direct PostgreSQL connection
-  const pgResult = await tryDirectPostgres()
-  if (pgResult.success) {
-    return NextResponse.json({
-      success: true,
-      message: "✅ Constraint corrigida com sucesso!",
-      method: pgResult.method,
-      envCheck,
-    })
+  const results: Record<string, any> = {}
+
+  // Try Method 1: Direct PostgreSQL
+  const pg = await tryDirectPostgres()
+  results.directPostgres = pg
+  if (pg.success) {
+    return NextResponse.json({ success: true, message: "✅ Constraint corrigida!", method: pg.method, envCheck })
   }
 
-  // Step 3: Try Supabase HTTP endpoints
-  const httpResult = await trySupabaseHttp()
-  if (httpResult.success) {
-    return NextResponse.json({
-      success: true,
-      message: "✅ Constraint corrigida com sucesso!",
-      method: httpResult.method,
-      envCheck,
-    })
+  // Try Method 2: Pooler with JWT auth
+  const pooler = await tryPoolerJwt()
+  results.poolerJwt = pooler
+  if (pooler.success) {
+    return NextResponse.json({ success: true, message: "✅ Constraint corrigida!", method: pooler.method, envCheck })
   }
 
-  // Step 4: If nothing worked, construct connection string from parts
-  if (process.env.POSTGRES_HOST && process.env.POSTGRES_PASSWORD) {
-    try {
-      const host = process.env.POSTGRES_HOST
-      const password = process.env.POSTGRES_PASSWORD
-      const user = process.env.POSTGRES_USER || "postgres"
-      const database = process.env.POSTGRES_DATABASE || "postgres"
-      const port = process.env.POSTGRES_PORT || "5432"
-      const connStr = `postgresql://${user}:${encodeURIComponent(password)}@${host}:${port}/${database}?sslmode=require`
-
-      const { Pool } = await import("pg")
-      const pool = new Pool({ connectionString: connStr, ssl: { rejectUnauthorized: false } })
-      await pool.query(ALTER_SQL)
-      await pool.end()
-
-      return NextResponse.json({
-        success: true,
-        message: "✅ Constraint corrigida com sucesso!",
-        method: "pg from individual env vars",
-        envCheck,
-      })
-    } catch (e: any) {
-      return NextResponse.json({
-        success: false,
-        message: "❌ Não consegui corrigir automaticamente",
-        errors: [pgResult.error, httpResult.error, `Individual vars: ${e.message}`],
-        envCheck,
-        manualFix: "Peça ao dono do projeto Supabase (fizhhazqanagnfkqsgtu) para rodar este SQL no SQL Editor:",
-        sql: "ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check; ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));",
-      }, { status: 500 })
-    }
+  // Try Method 3: HTTP SQL endpoints
+  const http = await tryHttpSql()
+  results.httpSql = http
+  if (http.success) {
+    return NextResponse.json({ success: true, message: "✅ Constraint corrigida!", method: http.method, envCheck })
   }
 
-  // Nothing worked
   return NextResponse.json({
     success: false,
-    message: "❌ Não consegui corrigir automaticamente. Nenhuma conexão direta ao PostgreSQL disponível.",
-    errors: [pgResult.error, httpResult.error],
+    message: "❌ Nenhum método funcionou. Veja os erros abaixo.",
+    results,
     envCheck,
-    manualFix: "Peça ao dono do projeto Supabase (fizhhazqanagnfkqsgtu) para rodar este SQL no SQL Editor:",
     sql: "ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check; ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));",
   }, { status: 500 })
 }
