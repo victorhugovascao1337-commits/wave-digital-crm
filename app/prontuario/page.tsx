@@ -111,63 +111,58 @@ export default function ProntuarioPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-blue-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-blue-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-blue-100 rounded-xl">
-                <FileText className="h-5 w-5 text-blue-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.total}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total</p>
+                <p className="text-xs font-medium text-blue-600 mb-1">Total</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-lg">
+                <FileText className="h-5 w-5 text-blue-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-emerald-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-emerald-100 rounded-xl">
-                <Stethoscope className="h-5 w-5 text-emerald-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.consultations}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Consultas</p>
+                <p className="text-xs font-medium text-emerald-600 mb-1">Consultas</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.consultations}</p>
+              </div>
+              <div className="p-2 bg-emerald-200 rounded-lg">
+                <Stethoscope className="h-5 w-5 text-emerald-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-violet-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-violet-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-violet-100 rounded-xl">
-                <TrendingUp className="h-5 w-5 text-violet-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-violet-50 to-violet-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.evolutions}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Evoluções</p>
+                <p className="text-xs font-medium text-violet-600 mb-1">Evoluções</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.evolutions}</p>
+              </div>
+              <div className="p-2 bg-violet-200 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-violet-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-amber-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-amber-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-amber-100 rounded-xl">
-                <Pill className="h-5 w-5 text-amber-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.prescriptions}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Prescrições</p>
+                <p className="text-xs font-medium text-amber-600 mb-1">Prescrições</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.prescriptions}</p>
+              </div>
+              <div className="p-2 bg-amber-200 rounded-lg">
+                <Pill className="h-5 w-5 text-amber-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-cyan-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-cyan-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-cyan-100 rounded-xl">
-                <Activity className="h-5 w-5 text-cyan-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.todayCount}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Hoje</p>
+                <p className="text-xs font-medium text-cyan-600 mb-1">Hoje</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.todayCount}</p>
+              </div>
+              <div className="p-2 bg-cyan-200 rounded-lg">
+                <Activity className="h-5 w-5 text-cyan-700" />
               </div>
             </div>
           </div>

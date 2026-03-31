@@ -135,51 +135,47 @@ export default function PacientesPage() {
 
         {/* Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-blue-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-blue-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-blue-100 rounded-xl">
-                <Users className="h-5 w-5 text-blue-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.total}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total</p>
+                <p className="text-xs font-medium text-blue-600 mb-1">Total</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-lg">
+                <Users className="h-5 w-5 text-blue-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-emerald-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-emerald-100 rounded-xl">
-                <UserCheck className="h-5 w-5 text-emerald-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.ativos}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Ativos</p>
+                <p className="text-xs font-medium text-emerald-600 mb-1">Ativos</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.ativos}</p>
+              </div>
+              <div className="p-2 bg-emerald-200 rounded-lg">
+                <UserCheck className="h-5 w-5 text-emerald-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-amber-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-amber-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-amber-100 rounded-xl">
-                <Clock className="h-5 w-5 text-amber-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.pendentes}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Pendentes</p>
+                <p className="text-xs font-medium text-amber-600 mb-1">Pendentes</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.pendentes}</p>
+              </div>
+              <div className="p-2 bg-amber-200 rounded-lg">
+                <Clock className="h-5 w-5 text-amber-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-gray-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-gray-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-gray-100 rounded-xl">
-                <UserX className="h-5 w-5 text-gray-500" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.inativos}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inativos</p>
+                <p className="text-xs font-medium text-gray-600 mb-1">Inativos</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.inativos}</p>
+              </div>
+              <div className="p-2 bg-gray-200 rounded-lg">
+                <UserX className="h-5 w-5 text-gray-700" />
               </div>
             </div>
           </div>

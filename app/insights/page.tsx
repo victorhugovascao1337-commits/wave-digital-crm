@@ -338,74 +338,62 @@ export default function InsightsPage() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-emerald-100/50" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-emerald-100 rounded-xl">
-                  <DollarSign className="h-4 w-4 text-emerald-600" />
-                </div>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Receita — {MONTH_SHORT[selectedMonth]}
+          <div className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-emerald-600 mb-1">Receita — {MONTH_SHORT[selectedMonth]}</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {formatCurrency(data?.monthlyRevenue || 0)}
                 </p>
               </div>
-              <p className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                {formatCurrency(data?.monthlyRevenue || 0)}
-              </p>
+              <div className="p-2 bg-emerald-200 rounded-lg">
+                <DollarSign className="h-5 w-5 text-emerald-700" />
+              </div>
             </div>
           </div>
 
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-blue-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-blue-100/50" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                </div>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Taxa Conclusão
+          <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-blue-600 mb-1">Taxa Conclusão</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {data?.completionRate || 0}%
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  {data?.completedConsultations || 0} de {data?.totalConsultations || 0}
                 </p>
               </div>
-              <p className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                {data?.completionRate || 0}%
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {data?.completedConsultations || 0} de {data?.totalConsultations || 0}
-              </p>
+              <div className="p-2 bg-blue-200 rounded-lg">
+                <CheckCircle2 className="h-5 w-5 text-blue-700" />
+              </div>
             </div>
           </div>
 
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-violet-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-violet-100/50" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-violet-100 rounded-xl">
-                  <Receipt className="h-4 w-4 text-violet-600" />
-                </div>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Ticket Médio
+          <div className="p-4 bg-gradient-to-br from-violet-50 to-violet-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-violet-600 mb-1">Ticket Médio</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {formatCurrency(data?.avgTicket || 0)}
                 </p>
               </div>
-              <p className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                {formatCurrency(data?.avgTicket || 0)}
-              </p>
+              <div className="p-2 bg-violet-200 rounded-lg">
+                <Receipt className="h-5 w-5 text-violet-700" />
+              </div>
             </div>
           </div>
 
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-amber-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-amber-100/50" />
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-amber-100 rounded-xl">
-                  <UserPlus className="h-4 w-4 text-amber-600" />
-                </div>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Novos Pacientes
+          <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-amber-600 mb-1">Novos Pacientes</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {data?.newPatients || 0}
                 </p>
               </div>
-              <p className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                {data?.newPatients || 0}
-              </p>
+              <div className="p-2 bg-amber-200 rounded-lg">
+                <UserPlus className="h-5 w-5 text-amber-700" />
+              </div>
             </div>
           </div>
         </div>

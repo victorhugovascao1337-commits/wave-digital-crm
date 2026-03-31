@@ -219,63 +219,58 @@ export default function TarefasPage() {
 
         {/* Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-blue-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-blue-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-blue-100 rounded-xl">
-                <ClipboardList className="h-5 w-5 text-blue-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.total}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total</p>
+                <p className="text-xs font-medium text-blue-600 mb-1">Total</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              </div>
+              <div className="p-2 bg-blue-200 rounded-lg">
+                <ClipboardList className="h-5 w-5 text-blue-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-gray-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-gray-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-gray-100 rounded-xl">
-                <Circle className="h-5 w-5 text-gray-500" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.todo}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">A Fazer</p>
+                <p className="text-xs font-medium text-gray-600 mb-1">A Fazer</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.todo}</p>
+              </div>
+              <div className="p-2 bg-gray-200 rounded-lg">
+                <Circle className="h-5 w-5 text-gray-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-sky-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-sky-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-sky-100 rounded-xl">
-                <Clock className="h-5 w-5 text-sky-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-sky-50 to-sky-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.inProgress}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Andamento</p>
+                <p className="text-xs font-medium text-sky-600 mb-1">Andamento</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.inProgress}</p>
+              </div>
+              <div className="p-2 bg-sky-200 rounded-lg">
+                <Clock className="h-5 w-5 text-sky-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-emerald-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-emerald-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-emerald-100 rounded-xl">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.completed}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Concluído</p>
+                <p className="text-xs font-medium text-emerald-600 mb-1">Concluído</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.completed}</p>
+              </div>
+              <div className="p-2 bg-emerald-200 rounded-lg">
+                <CheckCircle2 className="h-5 w-5 text-emerald-700" />
               </div>
             </div>
           </div>
-          <div className="relative overflow-hidden p-4 bg-gradient-to-br from-red-50 to-white rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
-            <div className="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-red-100/50" />
-            <div className="relative flex items-center gap-3">
-              <div className="p-2.5 bg-red-100 rounded-xl">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-              </div>
+          <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-2xl border-0 shadow-sm hover:shadow-md transition-shadow col-span-2 lg:col-span-1">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 tracking-tight">{stats.overdue}</p>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Atrasado</p>
+                <p className="text-xs font-medium text-red-600 mb-1">Atrasado</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.overdue}</p>
+              </div>
+              <div className="p-2 bg-red-200 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-red-700" />
               </div>
             </div>
           </div>
