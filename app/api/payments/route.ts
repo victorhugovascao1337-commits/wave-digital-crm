@@ -21,8 +21,9 @@ export async function GET(request: Request) {
 
   if (patientId) query = query.eq("patient_id", patientId)
   if (status) query = query.eq("status", status)
-  if (from) query = query.gte("payment_date", from)
-  if (to) query = query.lte("payment_date", to)
+  // Use created_at for date filtering (payment_date column may not exist)
+  if (from) query = query.gte("created_at", `${from}T00:00:00`)
+  if (to) query = query.lte("created_at", `${to}T23:59:59`)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

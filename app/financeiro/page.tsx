@@ -127,7 +127,11 @@ export default function FinanceiroPage() {
       const endDate = `${period}-${String(endDay).padStart(2, "0")}`
 
       const weekReceitas = payments
-        .filter((p) => p.status === "paid" && p.payment_date >= startDate && p.payment_date <= endDate)
+        .filter((p) => {
+          if (p.status !== "paid") return false
+          const pDate = (p.created_at || "").substring(0, 10)
+          return pDate >= startDate && pDate <= endDate
+        })
         .reduce((s, p) => s + Number(p.amount || 0), 0)
 
       const weekDespesas = expenses
@@ -158,19 +162,13 @@ export default function FinanceiroPage() {
 
   // Quick confirm payment
   const handleQuickConfirmPayment = async (payment: any) => {
-    const today = new Date().toISOString().split("T")[0]
     await fetch("/api/payments", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id: payment.id,
-        patient_id: payment.patient_id,
-        description: payment.description,
-        amount: payment.amount,
         status: "paid",
         payment_method: payment.payment_method || "pix",
-        payment_date: today,
-        due_date: payment.due_date,
       }),
     })
     fetchData()
