@@ -33,7 +33,7 @@ const navItems = [
   { href: "/anamnese", label: "Anamnese", icon: ClipboardList, roles: ["admin", "superadmin", "doctor"] },
   { href: "/documentos", label: "Documentos", icon: FileSignature, roles: ["admin", "superadmin", "doctor"] },
   { href: "/agenda", label: "Agenda", icon: Calendar, roles: ["admin", "superadmin", "doctor", "receptionist"] },
-  { href: "/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin", "superadmin"] },
+  { href: "/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin", "superadmin", "doctor"] },
   { href: "/pagamentos", label: "Pagamentos", icon: CreditCard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/tarefas", label: "Tarefas", icon: ClipboardList, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/insights", label: "Relatórios", icon: TrendingUp, roles: ["admin", "superadmin", "doctor"] },
