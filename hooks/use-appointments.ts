@@ -299,20 +299,33 @@ export async function updateAppointment(
   id: string, data: Partial<AppointmentFormData>
 ): Promise<Appointment> {
   const supabase = getSupabase()
-  const { price, ...rest } = data
-  const updateData: Record<string, unknown> = { ...rest }
-  if (price !== undefined) updateData.value = price
+
+  // Only send valid DB columns — filter out form-only fields
+  const updateData: Record<string, unknown> = {}
+
+  if (data.patient_id !== undefined) updateData.patient_id = data.patient_id
+  if (data.date !== undefined) updateData.date = data.date
+  if (data.start_time !== undefined) updateData.start_time = data.start_time
+  if (data.duration !== undefined) updateData.duration = data.duration
+  if (data.service !== undefined) updateData.service = data.service
+  if (data.price !== undefined) updateData.value = data.price
+  if (data.notes !== undefined) updateData.notes = data.notes || null
+  if (data.professional !== undefined) updateData.professional = data.professional || null
+
+  // Calculate end_time if start_time and duration are provided
   if (data.start_time && data.duration) {
     updateData.end_time = calculateEndTime(data.start_time, data.duration)
     const hasConflict = await checkTimeConflict(data.date!, data.start_time, data.duration, id)
     if (hasConflict) throw new Error("Conflito de horário: já existe uma consulta neste horário")
   }
+
   const { data: appointment, error } = await supabase
     .from("appointments")
     .update(updateData)
     .eq("id", id)
     .select(`*, patient:patients(*)`)
     .single()
+
   if (error) throw error
   return mapAppointmentFromDb(appointment as unknown as Record<string, unknown>)
 }
