@@ -196,7 +196,7 @@ export default function DashboardPage() {
   return (
     <CRMLayout>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel</h1>
           <p className="text-sm text-gray-400 mt-0.5">{getTodayFormatted()}</p>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
         {/* Revenue Card */}
         <Link href="/financeiro" className="block">
           <Card className="p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
@@ -300,7 +300,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         {/* Today's Schedule */}
         <div className="lg:col-span-2">
           <Card className="p-6 shadow-sm border-gray-100">
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                   <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-3 flex-1">
                       <Avatar className={cn("h-8 w-8 bg-gradient-to-br", avatarGradients[idx % avatarGradients.length])}>
-                        <AvatarFallback className="text-white text-xs font-bold">{apt.initials}</AvatarFallback>
+                        <AvatarFallback className="bg-transparent text-white text-xs font-bold">{apt.initials}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">{apt.patient}</p>
@@ -339,42 +339,45 @@ export default function DashboardPage() {
         </div>
 
         {/* Week Overview */}
-        <Card className="p-6 shadow-sm border-gray-100">
-          <div className="flex items-center justify-between mb-4">
+        <Card className="p-5 shadow-sm border-gray-100">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-gray-900">Visão da Semana</h2>
             <Link href="/agenda" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver agenda <ExternalLink className="h-3 w-3" /></Link>
           </div>
           {data?.weekDays && data.weekDays.length > 0 ? (
-            <div className="space-y-2.5">
-              {(() => {
-                const maxCount = Math.max(...data.weekDays.map((d) => d.count), 1)
-                return data.weekDays.map((day, idx) => (
-                  <div key={idx} className={cn("flex items-center gap-2 p-2 rounded-lg transition-colors", day.isToday ? "bg-blue-50 ring-1 ring-blue-200" : "")}>
-                    <span className={cn("w-8 text-xs font-bold text-center", day.isToday ? "text-blue-700" : "text-gray-500")}>{day.day}</span>
-                    <div className="flex-1 h-7 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={cn("h-full rounded-full transition-all flex items-center justify-end pr-2", day.isToday ? "bg-gradient-to-r from-blue-400 to-blue-600" : "bg-gradient-to-r from-gray-300 to-gray-400")}
-                        style={{ width: day.count > 0 ? `${Math.max((day.count / maxCount) * 100, 12)}%` : "0%" }}
-                      >
-                        {day.count > 0 && <span className="text-[10px] font-bold text-white">{day.count}</span>}
+            <>
+              <div className="grid grid-cols-6 gap-1.5 mb-3">
+                {(() => {
+                  const maxCount = Math.max(...data.weekDays.map((d) => d.count), 1)
+                  const barColors = ["bg-violet-400", "bg-blue-400", "bg-sky-400", "bg-emerald-400", "bg-amber-400", "bg-rose-400"]
+                  return data.weekDays.map((day, idx) => (
+                    <div key={idx} className="flex flex-col items-center">
+                      <div className={cn("w-full rounded-lg flex flex-col items-center justify-end overflow-hidden", day.isToday ? "ring-2 ring-blue-400 ring-offset-1" : "")} style={{ height: "120px", background: "#f3f4f6" }}>
+                        <div
+                          className={cn("w-full rounded-lg transition-all", day.isToday ? "bg-gradient-to-t from-blue-600 to-blue-400" : `bg-gradient-to-t from-gray-300 to-gray-200`)}
+                          style={{ height: day.count > 0 ? `${Math.max((day.count / maxCount) * 100, 15)}%` : "4px" }}
+                        />
                       </div>
+                      <span className={cn("text-lg font-bold mt-1.5", day.isToday ? "text-blue-700" : day.count > 0 ? "text-gray-800" : "text-gray-400")}>{day.count}</span>
+                      <span className={cn("text-[10px] font-semibold", day.isToday ? "text-blue-600" : "text-gray-500")}>{day.day}</span>
+                      {day.isToday && <div className="w-1 h-1 rounded-full bg-blue-500 mt-0.5" />}
                     </div>
-                    {day.count === 0 && <span className="text-[10px] text-gray-400 w-4">0</span>}
-                  </div>
-                ))
-              })()}
-              <div className="pt-2 border-t border-gray-100 mt-2">
-                <p className="text-sm font-semibold text-gray-900 text-center">{data.weekAppointments} consultas na semana</p>
+                  ))
+                })()}
               </div>
-            </div>
+              <div className="pt-2 border-t border-gray-100 flex items-center justify-center gap-2">
+                <Calendar className="h-3.5 w-3.5 text-blue-600" />
+                <p className="text-xs font-semibold text-gray-700">{data.weekAppointments} consultas na semana</p>
+              </div>
+            </>
           ) : (
-            <p className="text-sm text-gray-500 text-center py-8">Sem dados da semana</p>
+            <p className="text-sm text-gray-500 text-center py-8">Sem agendamentos esta semana</p>
           )}
         </Card>
       </div>
 
       {/* Charts and Financial Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Daily Revenue Chart */}
         <Card className="p-6 shadow-sm border-gray-100">
           <div className="flex items-center justify-between mb-4">
@@ -432,7 +435,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Financial Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* Pending Payments */}
         <Card className="p-6 shadow-sm border-gray-100 bg-amber-50">
           <div className="flex items-center justify-between mb-4">
@@ -472,7 +475,7 @@ export default function DashboardPage() {
 
       {/* Pending Payments Table */}
       {data?.pendingPayments && data.pendingPayments.length > 0 && (
-        <Card className="p-6 shadow-sm border-gray-100 mb-6">
+        <Card className="p-6 shadow-sm border-gray-100 mb-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-900">Últimos Pagamentos Pendentes</h2>
             <Link href="/financeiro" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver todos <ExternalLink className="h-3 w-3" /></Link>
@@ -533,7 +536,7 @@ export default function DashboardPage() {
       )}
 
       {/* Recent Activity & Birthdays */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Activity */}
         <Card className="p-6 shadow-sm border-gray-100">
           <div className="flex items-center justify-between mb-4">
