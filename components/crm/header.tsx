@@ -85,10 +85,10 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Pending Payments Alert - hidden on small screens */}
+        {/* Pending Payments Alert */}
         {pendingAmount > 0 && (
           <button
-            onClick={() => router.push("/pagamentos")}
+            onClick={() => router.push("/financeiro")}
             className="hidden md:flex px-3 lg:px-5 py-2 bg-accent text-primary font-bold text-xs lg:text-sm rounded-xl hover:bg-primary hover:text-white transition-all items-center"
           >
             <AlertTriangle className="h-4 w-4 mr-1 lg:mr-2" />
@@ -119,12 +119,17 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
                 {adminMessages.map((msg) => (
                   <div key={msg.id} className="px-4 py-3 border-b last:border-0 hover:bg-accent/20">
                     <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full flex-shrink-0 ${
-                        msg.type === "alerta" ? "bg-amber-500" :
-                        msg.type === "manutencao" ? "bg-orange-500" :
-                        msg.type === "promocao" ? "bg-green-500" :
-                        "bg-blue-500"
-                      }`} />
+                      <span
+                        className={`h-2 w-2 rounded-full flex-shrink-0 ${
+                          msg.type === "alerta"
+                            ? "bg-amber-500"
+                            : msg.type === "manutencao"
+                              ? "bg-orange-500"
+                              : msg.type === "promocao"
+                                ? "bg-green-500"
+                                : "bg-blue-500"
+                        }`}
+                      />
                       <p className="text-sm font-medium text-foreground">{msg.title}</p>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{msg.message}</p>
