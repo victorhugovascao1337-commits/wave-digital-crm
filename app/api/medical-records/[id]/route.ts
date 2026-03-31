@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     .from("medical_records")
     .select("*")
     .eq("id", id)
-    .eq("organization_id", clinicId)
+    .eq("clinic_id", clinicId)
     .single()
 
   if (error) {
@@ -43,7 +43,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
       .select()
       .single()
 
@@ -67,7 +67,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     .from("medical_records")
     .delete()
     .eq("id", id)
-    .eq("organization_id", clinicId)
+    .eq("clinic_id", clinicId)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

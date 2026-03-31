@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   let query = supabase
     .from("anamnesis")
     .select("*")
-    .eq("organization_id", clinicId)
+    .eq("clinic_id", clinicId)
     .order("created_at", { ascending: false })
 
   if (patientId) {
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from("anamnesis")
       .insert([{
-        organization_id: clinicId,
+        clinic_id: clinicId,
         patient_id: body.patient_id,
         filled_by: body.filled_by || null,
         chief_complaint: body.chief_complaint || null,
@@ -77,7 +77,7 @@ export async function PUT(request: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", body.id)
-      .eq("organization_id", clinicId)
+      .eq("clinic_id", clinicId)
       .select()
       .single()
 

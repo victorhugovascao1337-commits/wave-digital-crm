@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { getClinicId } from "@/lib/get-clinic-id"
 import { NextResponse } from "next/server"
 
 export async function GET(
@@ -7,11 +8,17 @@ export async function GET(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const clinicId = await getClinicId()
+
+  if (!clinicId) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+  }
 
   const { data: patient, error } = await supabase
     .from("patients")
     .select("*")
     .eq("id", id)
+    .eq("clinic_id", clinicId)
     .single()
 
   if (error) {
@@ -23,6 +30,7 @@ export async function GET(
     .from("appointments")
     .select("*")
     .eq("patient_id", id)
+    .eq("clinic_id", clinicId)
     .order("date", { ascending: false })
 
   // Get payments
@@ -30,6 +38,7 @@ export async function GET(
     .from("payments")
     .select("*")
     .eq("patient_id", id)
+    .eq("clinic_id", clinicId)
     .order("due_date", { ascending: false })
 
   return NextResponse.json({
@@ -45,7 +54,12 @@ export async function PUT(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const clinicId = await getClinicId()
   const body = await request.json()
+
+  if (!clinicId) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+  }
 
   // Map status from frontend to database values
   const statusMap: Record<string, string> = {
@@ -53,7 +67,7 @@ export async function PUT(
     inactive: "Inativo",
     pending: "Pendente",
   }
-  
+
   const { data, error } = await supabase
     .from("patients")
     .update({
@@ -78,6 +92,7 @@ export async function PUT(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
+    .eq("clinic_id", clinicId)
     .select()
     .single()
 
@@ -94,8 +109,17 @@ export async function DELETE(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const clinicId = await getClinicId()
 
-  const { error } = await supabase.from("patients").delete().eq("id", id)
+  if (!clinicId) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+  }
+
+  const { error } = await supabase
+    .from("patients")
+    .delete()
+    .eq("id", id)
+    .eq("clinic_id", clinicId)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

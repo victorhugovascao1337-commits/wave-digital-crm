@@ -27,8 +27,8 @@ export async function GET() {
       .from("payments")
       .select("amount")
       .eq("status", "paid")
-      .gte("paid_date", firstDayOfMonth)
-      .lte("paid_date", lastDayOfMonth)
+      .gte("created_at", `${firstDayOfMonth}T00:00:00`)
+      .lte("created_at", `${lastDayOfMonth}T23:59:59`)
   )
 
   const monthlyRevenue = paidPayments?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0

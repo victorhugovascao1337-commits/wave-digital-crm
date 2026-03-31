@@ -130,9 +130,9 @@ export default function InsightsPage() {
         const monthPaid = Array.isArray(payments)
           ? payments
               .filter(
-                (p: { status: string; paid_date?: string | null; created_at: string }) => {
+                (p: { status: string; payment_date?: string | null; created_at: string }) => {
                   if (p.status !== "paid") return false
-                  const pd = new Date(p.paid_date || p.created_at)
+                  const pd = new Date(p.created_at)
                   return pd.getMonth() === cm && pd.getFullYear() === cy
                 }
               )

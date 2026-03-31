@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   let query = supabase
     .from("medical_records")
     .select("*")
-    .eq("organization_id", clinicId)
+    .eq("clinic_id", clinicId)
     .order("created_at", { ascending: false })
 
   if (patientId) {
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const body = await request.json()
 
     const recordData = {
-      organization_id: clinicId,
+      clinic_id: clinicId,
       patient_id: body.patient_id,
       professional_id: body.professional_id || null,
       appointment_id: body.appointment_id || null,

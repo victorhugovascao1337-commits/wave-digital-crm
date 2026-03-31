@@ -583,7 +583,7 @@ export function PatientDetailsModal({
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {payment.status === "paid"
-                            ? `Pago em ${formatDate(payment.paid_date!)}`
+                            ? `Pago em ${formatDate(payment.payment_date || payment.created_at || "")}`
                             : `Vence em ${formatDate(payment.due_date)}`}
                           {payment.payment_method &&
                             ` • ${payment.payment_method}`}

@@ -6,7 +6,7 @@ export interface Patient {
   cpf: string | null
   birth_date: string | null
   notes: string | null
-  status: 'active' | 'inactive' | 'pending'
+  status: string
   cep: string | null
   street: string | null
   street_number: string | null
@@ -30,7 +30,7 @@ export interface Appointment {
   start_time: string
   end_time: string
   service: string
-  status: 'scheduled' | 'completed' | 'cancelled' | 'no_show'
+  status: 'PENDENTE' | 'CONFIRMADO' | 'CONCLUÍDO' | 'FALTOU' | 'CANCELADO' | 'CHEGOU' | 'EM ATENDIMENTO' | 'BLOQUEADO'
   notes: string | null
   amount: number
   created_at: string
@@ -50,7 +50,7 @@ export interface Payment {
   payment_method: string | null
   created_at: string
   updated_at: string
-  patient?: { id: string; full_name: string; cpf: string | null; phone: string | null; email: string | null }
+  patient?: { id: string; name: string; cpf: string | null; phone: string | null; email: string | null }
   appointment?: Appointment
 }
 

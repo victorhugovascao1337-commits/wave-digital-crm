@@ -50,7 +50,7 @@ interface Payment {
   description: string
   amount: number
   due_date: string
-  paid_date: string | null
+  payment_date: string | null
   status: "paid" | "pending" | "overdue"
   payment_method: string | null
   patients: {
@@ -158,7 +158,7 @@ export function PaymentList() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "paid",
-          paid_date: new Date().toISOString().split("T")[0],
+          payment_date: new Date().toISOString().split("T")[0],
           payment_method: paymentMethod,
         }),
       })
