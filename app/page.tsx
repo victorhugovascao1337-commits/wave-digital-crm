@@ -141,6 +141,8 @@ export default function DashboardPage() {
     window.open(`https://wa.me/55${phone.replace(/\D/g, "")}?text=${message}`, "_blank")
   }
 
+  const [paidIds, setPaidIds] = useState<Set<string>>(new Set())
+
   const markPaid = async (id: string) => {
     try {
       await fetch("/api/payments", {
@@ -148,7 +150,11 @@ export default function DashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: "paid" }),
       })
-      fetchData()
+      setPaidIds((prev) => new Set(prev).add(id))
+      setTimeout(() => {
+        setPaidIds((prev) => { const next = new Set(prev); next.delete(id); return next })
+        fetchData()
+      }, 1500)
     } catch (e) {
       console.error(e)
     }
@@ -502,7 +508,11 @@ export default function DashboardPage() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
-                        {payment.status === "pending" && (
+                        {paidIds.has(payment.id) ? (
+                          <Button size="sm" disabled className="h-7 text-xs bg-emerald-500 hover:bg-emerald-500 text-white border-emerald-500 gap-1">
+                            <Check className="h-3 w-3" /> Pago ✓
+                          </Button>
+                        ) : payment.status === "pending" ? (
                           <>
                             <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markPaid(payment.id)}>
                               <Check className="h-3 w-3 mr-1" /> Marcar Pago
@@ -511,7 +521,7 @@ export default function DashboardPage() {
                               <MessageSquare className="h-3 w-3" />
                             </Button>
                           </>
-                        )}
+                        ) : null}
                       </div>
                     </td>
                   </tr>
