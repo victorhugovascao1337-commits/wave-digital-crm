@@ -21,22 +21,31 @@ async function getClinicId(): Promise<string | null> {
   return _clinicId
 }
 
-// DB uses English status values (check constraint: appointments_status_check)
-// Map app status to DB status (identity — DB uses English lowercase)
+// DB uses PORTUGUESE UPPERCASE status values (check constraint: appointments_status_check)
+// Map app status to DB status
 const statusToDb: Record<string, string> = {
-  confirmed: "confirmed",
-  pending: "pending",
-  completed: "completed",
-  missed: "missed",
-  cancelled: "cancelled",
-  arrived: "arrived",
-  in_progress: "in_progress",
-  blocked: "blocked",
+  confirmed: "CONFIRMADO",
+  pending: "PENDENTE",
+  completed: "CONCLUÍDO",
+  missed: "FALTOU",
+  cancelled: "CANCELADO",
+  arrived: "CHEGOU",
+  in_progress: "EM ATENDIMENTO",
+  blocked: "BLOQUEADO",
 }
 
-// Map DB status to app status (handles both English and legacy Portuguese)
+// Map DB status to app status (handles Portuguese and any English fallback)
 const statusFromDb: Record<string, string> = {
-  // English (current DB format)
+  // Portuguese (current DB format)
+  CONFIRMADO: "confirmed",
+  PENDENTE: "pending",
+  "CONCLUÍDO": "completed",
+  FALTOU: "missed",
+  CANCELADO: "cancelled",
+  CHEGOU: "arrived",
+  "EM ATENDIMENTO": "in_progress",
+  BLOQUEADO: "blocked",
+  // English fallback (in case any rows have English values)
   confirmed: "confirmed",
   pending: "pending",
   completed: "completed",
@@ -46,15 +55,6 @@ const statusFromDb: Record<string, string> = {
   in_progress: "in_progress",
   blocked: "blocked",
   scheduled: "pending",
-  // Legacy Portuguese (backwards compat)
-  CONFIRMADO: "confirmed",
-  PENDENTE: "pending",
-  "CONCLUÍDO": "completed",
-  FALTOU: "missed",
-  CANCELADO: "cancelled",
-  CHEGOU: "arrived",
-  "EM ATENDIMENTO": "in_progress",
-  BLOQUEADO: "blocked",
 }
 
 function mapAppointmentFromDb(apt: Record<string, unknown>): Appointment {
@@ -228,7 +228,7 @@ export async function checkTimeConflict(
     .from("appointments")
     .select("id, start_time, end_time")
     .eq("date", date)
-    .neq("status", "cancelled")
+    .neq("status", "CANCELADO")
   if (excludeId) query = query.neq("id", excludeId)
   const { data: existing, error } = await query
   if (error) throw error
@@ -279,7 +279,7 @@ export async function createAppointment(data: AppointmentFormData): Promise<Appo
       service: data.is_block ? (data.block_reason || "Bloqueio") : data.service,
       value: data.is_block ? 0 : (data.price || 0),
       notes: data.notes || null,
-      status: data.is_block ? "blocked" : "pending",
+      status: data.is_block ? "BLOQUEADO" : "PENDENTE",
       professional: data.professional || null,
       clinic_id: clinicId,
     }
