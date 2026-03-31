@@ -1,81 +1,161 @@
-import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
 // ONE-TIME endpoint to fix the appointments CHECK constraint
-// After running once successfully, this file can be deleted
-export async function POST() {
-  try {
-    const supabase = await createClient()
+// Deploy, access once via browser, then delete this file
 
-    // Drop old constraint and add new one with ALL Portuguese status values
-    const { error: dropError } = await supabase.rpc("exec_sql", {
-      query: `ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check`
-    })
+const ALTER_SQL = `
+DO $$
+BEGIN
+  -- Drop old constraint if exists
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'appointments_status_check'
+  ) THEN
+    ALTER TABLE public.appointments DROP CONSTRAINT appointments_status_check;
+  END IF;
 
-    // If rpc doesn't exist, try direct SQL via REST
-    if (dropError) {
-      console.log("rpc exec_sql not available, trying direct approach...")
+  -- Add new constraint with ALL status values
+  ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check
+    CHECK (status IN (
+      'PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO',
+      'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'
+    ));
+END $$;
+`
 
-      // Try using the Supabase SQL execution through the admin API
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+async function tryDirectPostgres(): Promise<{ success: boolean; method?: string; error?: string }> {
+  // Try POSTGRES_URL, DATABASE_URL, or construct from individual vars
+  const connString =
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    null
 
-      if (!supabaseUrl || !serviceKey) {
-        return NextResponse.json({
-          error: "SUPABASE_SERVICE_ROLE_KEY não configurada. Execute o SQL manualmente no Supabase Dashboard.",
-          sql: `ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check; ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));`
-        }, { status: 500 })
-      }
+  if (connString) {
+    try {
+      // Dynamic import - pg may or may not be available
+      const { Pool } = await import("pg")
+      const pool = new Pool({ connectionString: connString, ssl: { rejectUnauthorized: false } })
+      await pool.query(ALTER_SQL)
+      await pool.end()
+      return { success: true, method: "pg direct connection" }
+    } catch (e: any) {
+      return { success: false, error: `pg connection failed: ${e.message}` }
+    }
+  }
+  return { success: false, error: "No POSTGRES_URL or DATABASE_URL found" }
+}
 
-      // Use Supabase REST API to execute SQL
-      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
+async function trySupabaseHttp(): Promise<{ success: boolean; method?: string; error?: string }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceKey) {
+    return { success: false, error: "Missing SUPABASE_URL or SERVICE_ROLE_KEY" }
+  }
+
+  // Try the Supabase SQL endpoint (available in newer Supabase versions)
+  const endpoints = [
+    `${supabaseUrl}/rest/v1/rpc/exec_sql`,
+    `${supabaseUrl}/pg/query`,
+  ]
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": serviceKey,
-          "Authorization": `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
         },
-        body: JSON.stringify({
-          query: `
-            ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check;
-            ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check
-              CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));
-          `
-        }),
+        body: JSON.stringify({ query: ALTER_SQL }),
       })
-
-      if (!res.ok) {
-        return NextResponse.json({
-          error: "Não foi possível executar SQL automaticamente. Execute manualmente no Supabase Dashboard → SQL Editor.",
-          sql: `ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check;\nALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));`
-        }, { status: 500 })
+      if (res.ok) {
+        return { success: true, method: `HTTP ${endpoint}` }
       }
-
-      return NextResponse.json({ success: true, message: "Constraint atualizada com sucesso via REST API" })
+    } catch {
+      continue
     }
-
-    // If rpc worked for drop, now add the new constraint
-    const { error: addError } = await supabase.rpc("exec_sql", {
-      query: `ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'))`
-    })
-
-    if (addError) {
-      return NextResponse.json({ error: addError.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, message: "Constraint atualizada com sucesso!" })
-  } catch (err: any) {
-    return NextResponse.json({
-      error: err?.message || "Erro interno",
-      sql: `ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check;\nALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));`
-    }, { status: 500 })
   }
+
+  return { success: false, error: "No HTTP SQL endpoint available" }
 }
 
-// GET for easy browser access
 export async function GET() {
+  // Step 1: Report what env vars are available (names only, no values)
+  const envCheck = {
+    POSTGRES_URL: !!process.env.POSTGRES_URL,
+    POSTGRES_URL_NON_POOLING: !!process.env.POSTGRES_URL_NON_POOLING,
+    DATABASE_URL: !!process.env.DATABASE_URL,
+    NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_DB_URL: !!process.env.SUPABASE_DB_URL,
+    POSTGRES_HOST: !!process.env.POSTGRES_HOST,
+    POSTGRES_PASSWORD: !!process.env.POSTGRES_PASSWORD,
+  }
+
+  // Step 2: Try direct PostgreSQL connection
+  const pgResult = await tryDirectPostgres()
+  if (pgResult.success) {
+    return NextResponse.json({
+      success: true,
+      message: "✅ Constraint corrigida com sucesso!",
+      method: pgResult.method,
+      envCheck,
+    })
+  }
+
+  // Step 3: Try Supabase HTTP endpoints
+  const httpResult = await trySupabaseHttp()
+  if (httpResult.success) {
+    return NextResponse.json({
+      success: true,
+      message: "✅ Constraint corrigida com sucesso!",
+      method: httpResult.method,
+      envCheck,
+    })
+  }
+
+  // Step 4: If nothing worked, construct connection string from parts
+  if (process.env.POSTGRES_HOST && process.env.POSTGRES_PASSWORD) {
+    try {
+      const host = process.env.POSTGRES_HOST
+      const password = process.env.POSTGRES_PASSWORD
+      const user = process.env.POSTGRES_USER || "postgres"
+      const database = process.env.POSTGRES_DATABASE || "postgres"
+      const port = process.env.POSTGRES_PORT || "5432"
+      const connStr = `postgresql://${user}:${encodeURIComponent(password)}@${host}:${port}/${database}?sslmode=require`
+
+      const { Pool } = await import("pg")
+      const pool = new Pool({ connectionString: connStr, ssl: { rejectUnauthorized: false } })
+      await pool.query(ALTER_SQL)
+      await pool.end()
+
+      return NextResponse.json({
+        success: true,
+        message: "✅ Constraint corrigida com sucesso!",
+        method: "pg from individual env vars",
+        envCheck,
+      })
+    } catch (e: any) {
+      return NextResponse.json({
+        success: false,
+        message: "❌ Não consegui corrigir automaticamente",
+        errors: [pgResult.error, httpResult.error, `Individual vars: ${e.message}`],
+        envCheck,
+        manualFix: "Peça ao dono do projeto Supabase (fizhhazqanagnfkqsgtu) para rodar este SQL no SQL Editor:",
+        sql: "ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check; ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));",
+      }, { status: 500 })
+    }
+  }
+
+  // Nothing worked
   return NextResponse.json({
-    message: "Execute um POST neste endpoint para corrigir a constraint do banco, OU copie o SQL abaixo e execute no Supabase Dashboard → SQL Editor",
-    sql: `ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check;\nALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));`
-  })
+    success: false,
+    message: "❌ Não consegui corrigir automaticamente. Nenhuma conexão direta ao PostgreSQL disponível.",
+    errors: [pgResult.error, httpResult.error],
+    envCheck,
+    manualFix: "Peça ao dono do projeto Supabase (fizhhazqanagnfkqsgtu) para rodar este SQL no SQL Editor:",
+    sql: "ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check; ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));",
+  }, { status: 500 })
 }
