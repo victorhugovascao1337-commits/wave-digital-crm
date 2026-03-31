@@ -120,6 +120,7 @@ export function AppointmentModal({
       setBlockReason(appointment.block_reason || "")
       setPatientSearch("")
       setShowPaymentMethod(false)
+      setPaymentError(null)
 
       // Set patient search text
       if (appointment.patient) {
@@ -140,6 +141,7 @@ export function AppointmentModal({
       setBlockReason("")
       setPatientSearch("")
       setShowPaymentMethod(false)
+      setPaymentError(null)
     }
     setConfirmDelete(false)
     setShowPatientDropdown(false)
@@ -176,9 +178,12 @@ export function AppointmentModal({
     })
   }
 
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+
   const handleConfirmPayment = async () => {
     if (!payment) return
     setPaymentLoading(true)
+    setPaymentError(null)
     try {
       const today = new Date().toISOString().split("T")[0]
       const res = await fetch("/api/payments", {
@@ -199,7 +204,15 @@ export function AppointmentModal({
         const updated = await res.json()
         setPayment(updated)
         setShowPaymentMethod(false)
+      } else {
+        const errData = await res.json().catch(() => null)
+        const msg = errData?.error || `Erro ${res.status} ao confirmar pagamento`
+        console.error("Erro ao confirmar pagamento:", msg, errData)
+        setPaymentError(msg)
       }
+    } catch (err: any) {
+      console.error("Erro ao confirmar pagamento:", err)
+      setPaymentError(err?.message || "Erro de conexão ao confirmar pagamento")
     } finally {
       setPaymentLoading(false)
     }
@@ -349,9 +362,9 @@ export function AppointmentModal({
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           {/* Error */}
-          {error && (
+          {(error || paymentError) && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-              {error}
+              {error || paymentError}
             </div>
           )}
 

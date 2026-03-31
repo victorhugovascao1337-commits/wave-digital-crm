@@ -144,8 +144,9 @@ export function SchedulingCalendar() {
       }
       mutateAll()
       handleCloseModal()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao salvar consulta")
+    } catch (err: any) {
+      console.error("Erro ao salvar consulta:", err)
+      setError(err?.message || String(err) || "Erro ao salvar consulta")
     } finally {
       setIsLoading(false)
     }
@@ -158,8 +159,9 @@ export function SchedulingCalendar() {
       await deleteAppointment(id)
       mutateAll()
       handleCloseModal()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao excluir consulta")
+    } catch (err: any) {
+      console.error("Erro ao excluir consulta:", err)
+      setError(err?.message || String(err) || "Erro ao excluir consulta")
     } finally {
       setIsLoading(false)
     }
@@ -172,8 +174,9 @@ export function SchedulingCalendar() {
       const updated = await updateAppointmentStatus(id, status)
       setSelectedAppointment(updated)
       mutateAll()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao atualizar status")
+    } catch (err: any) {
+      console.error("Erro ao atualizar status:", err)
+      setError(err?.message || String(err) || "Erro ao atualizar status")
     } finally {
       setIsLoading(false)
     }
