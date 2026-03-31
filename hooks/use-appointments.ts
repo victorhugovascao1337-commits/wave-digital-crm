@@ -21,17 +21,18 @@ async function getClinicId(): Promise<string | null> {
   return _clinicId
 }
 
-// DB uses PORTUGUESE UPPERCASE status values (check constraint: appointments_status_check)
-// Map app status to DB status
+// DB CHECK constraint only allows: PENDENTE, CONFIRMADO, CONCLUÍDO, FALTOU, CANCELADO
+// CHEGOU, EM ATENDIMENTO, BLOQUEADO are NOT allowed by the constraint
 const statusToDb: Record<string, string> = {
   confirmed: "CONFIRMADO",
   pending: "PENDENTE",
   completed: "CONCLUÍDO",
   missed: "FALTOU",
   cancelled: "CANCELADO",
-  arrived: "CHEGOU",
-  in_progress: "EM ATENDIMENTO",
-  blocked: "BLOQUEADO",
+  // Fallbacks for statuses NOT in the DB constraint:
+  arrived: "CONFIRMADO",
+  in_progress: "CONFIRMADO",
+  blocked: "CANCELADO",
 }
 
 // Map DB status to app status (handles Portuguese and any English fallback)
@@ -279,7 +280,7 @@ export async function createAppointment(data: AppointmentFormData): Promise<Appo
       service: data.is_block ? (data.block_reason || "Bloqueio") : data.service,
       value: data.is_block ? 0 : (data.price || 0),
       notes: data.notes || null,
-      status: data.is_block ? "BLOQUEADO" : "PENDENTE",
+      status: data.is_block ? "CANCELADO" : "PENDENTE",
       professional: data.professional || null,
       clinic_id: clinicId,
     }

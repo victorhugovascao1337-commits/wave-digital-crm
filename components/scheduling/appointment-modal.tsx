@@ -218,8 +218,22 @@ export function AppointmentModal({
     }
   }
 
-  // Valid next statuses for current appointment
-  const nextStatuses = appointment ? (STATUS_FLOW[appointment.status] || []) : []
+  // DB constraint only allows: PENDENTE, CONFIRMADO, CONCLUÍDO, FALTOU, CANCELADO
+  // Override STATUS_FLOW to only use allowed transitions
+  const SAFE_STATUS_FLOW: Record<string, string[]> = {
+    pending: ["confirmed", "cancelled"],
+    confirmed: ["completed", "missed", "cancelled"],
+    completed: [],
+    missed: [],
+    cancelled: [],
+    // Fallback for any legacy statuses
+    arrived: ["completed", "missed"],
+    in_progress: ["completed"],
+    blocked: [],
+  }
+  const nextStatuses = appointment
+    ? (SAFE_STATUS_FLOW[appointment.status] || STATUS_FLOW[appointment.status] || [])
+    : []
 
   if (!open) return null
 
