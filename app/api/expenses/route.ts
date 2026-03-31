@@ -8,21 +8,21 @@ export async function GET(request: Request) {
   if (!clinicId) return NextResponse.json([])
 
   const { searchParams } = new URL(request.url)
-  const patientId = searchParams.get("patient_id")
   const status = searchParams.get("status")
+  const categoryId = searchParams.get("category_id")
   const from = searchParams.get("from")
   const to = searchParams.get("to")
 
   let query = supabase
-    .from("payments")
-    .select("*, patient:patients(id, full_name, cpf, phone, email)")
+    .from("expenses")
+    .select("*, category:financial_categories(id, name, color)")
     .eq("organization_id", clinicId)
-    .order("created_at", { ascending: false })
+    .order("expense_date", { ascending: false })
 
-  if (patientId) query = query.eq("patient_id", patientId)
   if (status) query = query.eq("status", status)
-  if (from) query = query.gte("payment_date", from)
-  if (to) query = query.lte("payment_date", to)
+  if (categoryId) query = query.eq("category_id", categoryId)
+  if (from) query = query.gte("expense_date", from)
+  if (to) query = query.lte("expense_date", to)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -36,25 +36,26 @@ export async function POST(request: Request) {
     const body = await request.json()
 
     const { data, error } = await supabase
-      .from("payments")
+      .from("expenses")
       .insert([{
         organization_id: clinicId,
-        patient_id: body.patient_id,
-        appointment_id: body.appointment_id || null,
-        description: body.description || null,
+        category_id: body.category_id || null,
+        description: body.description,
         amount: body.amount,
-        status: body.status || "pending",
+        expense_date: body.expense_date || new Date().toISOString().split("T")[0],
         payment_method: body.payment_method || null,
-        payment_date: body.payment_date || null,
-        due_date: body.due_date || null,
+        status: body.status || "paid",
+        recurrence: body.recurrence || "none",
+        notes: body.notes || null,
+        created_by: body.created_by || null,
       }])
-      .select("*, patient:patients(id, full_name, cpf, phone, email)")
+      .select("*, category:financial_categories(id, name, color)")
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json(data)
   } catch (err) {
-    console.error("Erro ao criar pagamento:", err)
+    console.error("Erro ao criar despesa:", err)
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
   }
 }
@@ -66,26 +67,27 @@ export async function PUT(request: Request) {
     const body = await request.json()
 
     const { data, error } = await supabase
-      .from("payments")
+      .from("expenses")
       .update({
-        patient_id: body.patient_id,
+        category_id: body.category_id,
         description: body.description,
         amount: body.amount,
-        status: body.status,
+        expense_date: body.expense_date,
         payment_method: body.payment_method,
-        payment_date: body.payment_date,
-        due_date: body.due_date,
+        status: body.status,
+        recurrence: body.recurrence,
+        notes: body.notes,
         updated_at: new Date().toISOString(),
       })
       .eq("id", body.id)
       .eq("organization_id", clinicId)
-      .select("*, patient:patients(id, full_name, cpf, phone, email)")
+      .select("*, category:financial_categories(id, name, color)")
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json(data)
   } catch (err) {
-    console.error("Erro ao atualizar pagamento:", err)
+    console.error("Erro ao atualizar despesa:", err)
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
   }
 }
@@ -100,7 +102,7 @@ export async function DELETE(request: Request) {
     if (!id) return NextResponse.json({ error: "ID obrigatório" }, { status: 400 })
 
     const { error } = await supabase
-      .from("payments")
+      .from("expenses")
       .delete()
       .eq("id", id)
       .eq("organization_id", clinicId)
@@ -108,7 +110,7 @@ export async function DELETE(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error("Erro ao deletar pagamento:", err)
+    console.error("Erro ao deletar despesa:", err)
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
   }
 }

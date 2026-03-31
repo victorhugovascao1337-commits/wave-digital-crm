@@ -44,13 +44,38 @@ export interface Payment {
   appointment_id: string | null
   description: string
   amount: number
-  due_date: string
-  paid_date: string | null
+  due_date: string | null
+  payment_date: string | null
   status: 'paid' | 'pending' | 'overdue'
   payment_method: string | null
   created_at: string
   updated_at: string
+  patient?: { id: string; full_name: string; cpf: string | null; phone: string | null; email: string | null }
   appointment?: Appointment
+}
+
+export interface Expense {
+  id: string
+  category_id: string | null
+  description: string
+  amount: number
+  expense_date: string
+  payment_method: string | null
+  status: 'paid' | 'pending' | 'overdue'
+  recurrence: 'none' | 'weekly' | 'monthly' | 'yearly'
+  notes: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+  category?: FinancialCategory
+}
+
+export interface FinancialCategory {
+  id: string
+  name: string
+  type: 'income' | 'expense'
+  color: string
+  created_at: string
 }
 
 export interface MedicalRecord {
@@ -132,6 +157,17 @@ export interface Service {
   is_active: boolean
   created_at: string
   updated_at: string
+}
+
+export interface Commission {
+  id: string
+  professional_id: string
+  payment_id: string
+  percentage: number
+  amount: number
+  status: 'pending' | 'paid'
+  paid_at: string | null
+  created_at: string
 }
 
 export interface PatientWithRelations extends Patient {
