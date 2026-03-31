@@ -28,6 +28,7 @@ interface DashboardData {
   todayByStatus: Record<string, number>
   weekAppointments: number
   weekSlots: number
+  weekDays: { day: string; date: string; count: number; isToday: boolean }[]
   pendingTotal: number
   pendingCount: number
   overdueTotal: number
@@ -135,6 +136,18 @@ export default function DashboardPage() {
   }
 
   const methodColors = ["bg-violet-500", "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"]
+  const avatarGradients = [
+    "from-blue-400 to-blue-600",
+    "from-emerald-400 to-emerald-600",
+    "from-violet-400 to-violet-600",
+    "from-rose-400 to-rose-600",
+    "from-amber-400 to-amber-600",
+    "from-sky-400 to-sky-600",
+    "from-pink-400 to-pink-600",
+    "from-teal-400 to-teal-600",
+    "from-indigo-400 to-indigo-600",
+    "from-orange-400 to-orange-600",
+  ]
 
   const handleWhatsApp = (phone: string, name: string, msg: string) => {
     const message = encodeURIComponent(msg)
@@ -166,7 +179,6 @@ export default function DashboardPage() {
     return f.charAt(0).toUpperCase() + f.slice(1)
   }
 
-  const occupationRate = data ? (data.weekSlots > 0 ? Math.round((data.weekAppointments / data.weekSlots) * 100) : 0) : 0
   const revenueChange = data ? pct(data.monthlyRevenue, data.prevMonthRevenue) : 0
   const maxDailyRevenue = data ? Math.max(...data.dailyRevenue.map((d) => d.total), 1) : 1
 
@@ -198,7 +210,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         {/* Revenue Card */}
         <Link href="/financeiro" className="block">
           <Card className="p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
@@ -228,20 +240,6 @@ export default function DashboardPage() {
                 <p className="text-[10px] text-red-600 mt-1.5 font-medium">Este mês</p>
               </div>
               <div className="p-2 bg-red-200 rounded-lg"><Banknote className="h-5 w-5 text-red-700" /></div>
-            </div>
-          </Card>
-        </Link>
-
-        {/* Net Profit Card */}
-        <Link href="/financeiro" className="block">
-          <Card className="p-5 bg-gradient-to-br from-emerald-50 to-emerald-100 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-emerald-600 mb-1">Lucro Líquido</p>
-                <p className="text-xl font-bold text-gray-900">{data ? fmtShort(data.netProfit) : "R$ 0"}</p>
-                <p className="text-[10px] text-emerald-600 mt-1.5 font-medium">Este mês</p>
-              </div>
-              <div className="p-2 bg-emerald-200 rounded-lg"><TrendingUp className="h-5 w-5 text-emerald-700" /></div>
             </div>
           </Card>
         </Link>
@@ -316,10 +314,10 @@ export default function DashboardPage() {
 
             {data?.todaySchedule && data.todaySchedule.length > 0 ? (
               <div className="space-y-3">
-                {data.todaySchedule.map((apt) => (
+                {data.todaySchedule.map((apt, idx) => (
                   <div key={apt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-3 flex-1">
-                      <Avatar className="h-8 w-8 bg-gradient-to-br from-blue-400 to-blue-600">
+                      <Avatar className={cn("h-8 w-8 bg-gradient-to-br", avatarGradients[idx % avatarGradients.length])}>
                         <AvatarFallback className="text-white text-xs font-bold">{apt.initials}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -340,36 +338,38 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Occupation Rate */}
+        {/* Week Overview */}
         <Card className="p-6 shadow-sm border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900">Taxa de Ocupação</h2>
+            <h2 className="text-lg font-bold text-gray-900">Visão da Semana</h2>
             <Link href="/agenda" className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">Ver agenda <ExternalLink className="h-3 w-3" /></Link>
           </div>
-          <div className="flex flex-col items-center justify-center py-4">
-            <div className="relative w-32 h-32 mb-4">
-              <svg className="w-full h-full" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" strokeWidth="8" />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="8"
-                  strokeDasharray={`${(occupationRate / 100) * 283} 283`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 50 50)"
-                />
-                <text x="50" y="50" textAnchor="middle" dy=".3em" className="text-2xl font-bold fill-gray-900">
-                  {occupationRate}%
-                </text>
-              </svg>
+          {data?.weekDays && data.weekDays.length > 0 ? (
+            <div className="space-y-2.5">
+              {(() => {
+                const maxCount = Math.max(...data.weekDays.map((d) => d.count), 1)
+                return data.weekDays.map((day, idx) => (
+                  <div key={idx} className={cn("flex items-center gap-2 p-2 rounded-lg transition-colors", day.isToday ? "bg-blue-50 ring-1 ring-blue-200" : "")}>
+                    <span className={cn("w-8 text-xs font-bold text-center", day.isToday ? "text-blue-700" : "text-gray-500")}>{day.day}</span>
+                    <div className="flex-1 h-7 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-full rounded-full transition-all flex items-center justify-end pr-2", day.isToday ? "bg-gradient-to-r from-blue-400 to-blue-600" : "bg-gradient-to-r from-gray-300 to-gray-400")}
+                        style={{ width: day.count > 0 ? `${Math.max((day.count / maxCount) * 100, 12)}%` : "0%" }}
+                      >
+                        {day.count > 0 && <span className="text-[10px] font-bold text-white">{day.count}</span>}
+                      </div>
+                    </div>
+                    {day.count === 0 && <span className="text-[10px] text-gray-400 w-4">0</span>}
+                  </div>
+                ))
+              })()}
+              <div className="pt-2 border-t border-gray-100 mt-2">
+                <p className="text-sm font-semibold text-gray-900 text-center">{data.weekAppointments} consultas na semana</p>
+              </div>
             </div>
-            <p className="text-sm text-gray-600 text-center">
-              {data?.weekAppointments || 0} de {data?.weekSlots || 0} slots esta semana
-            </p>
-          </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-8">Sem dados da semana</p>
+          )}
         </Card>
       </div>
 

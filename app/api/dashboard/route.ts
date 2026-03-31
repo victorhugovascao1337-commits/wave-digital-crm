@@ -95,17 +95,32 @@ export async function GET() {
     initials: (a.patients?.name || "??").split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
   }))
 
-  // === WEEK OCCUPATION ===
-  const { count: weekAppointments } = await withClinic(
+  // === WEEK OVERVIEW ===
+  const friday = new Date(monday)
+  friday.setDate(monday.getDate() + 5)
+  const weekEnd = friday.toISOString().split("T")[0]
+
+  const { data: weekAppts } = await withClinic(
     supabase
       .from("appointments")
-      .select("*", { count: "exact", head: true })
+      .select("id, date, status")
       .gte("date", weekStart)
-      .lte("date", today)
+      .lte("date", weekEnd)
   )
-  // Assuming 8h-19h = 22 half-hour slots per day, 5 days
+  const weekAppointments = weekAppts?.length || 0
   const daysElapsed = Math.min(((now.getDay() || 7) - 1) + 1, 5)
   const weekSlots = daysElapsed * 22
+
+  // Build per-day breakdown Mon-Sat
+  const dayNames = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+  const weekDays: { day: string; date: string; count: number; isToday: boolean }[] = []
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    const dateStr = d.toISOString().split("T")[0]
+    const count = weekAppts?.filter((a: any) => a.date === dateStr).length || 0
+    weekDays.push({ day: dayNames[i], date: dateStr, count, isToday: dateStr === today })
+  }
 
   // === PENDING PAYMENTS ===
   const { data: pendingPmts } = await withClinic(
@@ -240,7 +255,7 @@ export async function GET() {
     newPatientsThisMonth: newPatientsThisMonth || 0,
     prevMonthPatients: prevMonthPatients || 0,
     todayAppointments, todayByStatus,
-    weekAppointments: weekAppointments || 0, weekSlots,
+    weekAppointments: weekAppointments || 0, weekSlots, weekDays,
     pendingTotal, pendingCount, overdueTotal, overdueCount,
     pendencias: pendingCount + overdueCount,
     dailyRevenue, paymentMethods,
