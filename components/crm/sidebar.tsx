@@ -21,11 +21,11 @@ import {
   FileText,
   FileSignature,
   Wallet,
+  Bell,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
-// roles: admin/superadmin = all, doctor = no usuarios/configuracoes, receptionist = basic only
 const navItems = [
   { href: "/", label: "Painel", icon: LayoutDashboard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/pacientes", label: "Pacientes", icon: Users, roles: ["admin", "superadmin", "doctor", "receptionist"] },
@@ -35,6 +35,7 @@ const navItems = [
   { href: "/agenda", label: "Agenda", icon: Calendar, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin", "superadmin", "doctor"] },
   { href: "/pagamentos", label: "Pagamentos", icon: CreditCard, roles: ["admin", "superadmin", "doctor", "receptionist"] },
+  { href: "/notificacoes", label: "Notificações", icon: Bell, roles: ["admin", "superadmin", "doctor"] },
   { href: "/tarefas", label: "Tarefas", icon: ClipboardList, roles: ["admin", "superadmin", "doctor", "receptionist"] },
   { href: "/insights", label: "Relatórios", icon: TrendingUp, roles: ["admin", "superadmin", "doctor"] },
   { href: "/usuarios", label: "Usuários", icon: UserCog, roles: ["admin", "superadmin"] },
@@ -70,7 +71,6 @@ export function Sidebar({ onNovaConsulta, mobileOpen, onMobileClose }: SidebarPr
       })
   }, [])
 
-  // Close mobile sidebar on navigation
   useEffect(() => {
     onMobileClose()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,7 +174,6 @@ export function Sidebar({ onNovaConsulta, mobileOpen, onMobileClose }: SidebarPr
   )
 }
 
-// Hamburger button exported for use in header
 export function MobileMenuButton({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} className="lg:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground">
