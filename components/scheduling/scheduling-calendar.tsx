@@ -192,31 +192,31 @@ export function SchedulingCalendar() {
   }, [mutateAll])
 
   return (
-    <div className="h-full flex flex-col bg-card rounded-xl border shadow-sm">
+    <div className="h-full flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm">
       {/* Stats Bar */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-2 flex-wrap">
-        <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg px-3 py-1.5">
+        <div className="flex items-center gap-1.5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl px-3 py-1.5 shadow-sm">
           <CalendarDays className="h-3.5 w-3.5 text-gray-500" />
           <span className="text-xs font-bold text-gray-700">{stats.total}</span>
           <span className="text-[10px] text-gray-400">hoje</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-blue-50 rounded-lg px-3 py-1.5">
+        <div className="flex items-center gap-1.5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl px-3 py-1.5 shadow-sm">
           <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
           <span className="text-xs font-bold text-blue-700">{stats.confirmed}</span>
           <span className="text-[10px] text-blue-400">confirmados</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-amber-50 rounded-lg px-3 py-1.5">
+        <div className="flex items-center gap-1.5 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl px-3 py-1.5 shadow-sm">
           <Clock className="h-3.5 w-3.5 text-amber-500" />
           <span className="text-xs font-bold text-amber-700">{stats.pending}</span>
           <span className="text-[10px] text-amber-400">pendentes</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-emerald-50 rounded-lg px-3 py-1.5">
+        <div className="flex items-center gap-1.5 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl px-3 py-1.5 shadow-sm">
           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
           <span className="text-xs font-bold text-emerald-700">{stats.completed}</span>
           <span className="text-[10px] text-emerald-400">concluídos</span>
         </div>
         {stats.missed > 0 && (
-          <div className="flex items-center gap-1.5 bg-red-50 rounded-lg px-3 py-1.5">
+          <div className="flex items-center gap-1.5 bg-gradient-to-br from-red-50 to-red-100 rounded-xl px-3 py-1.5 shadow-sm">
             <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
             <span className="text-xs font-bold text-red-700">{stats.missed}</span>
             <span className="text-[10px] text-red-400">faltas</span>
@@ -229,7 +229,7 @@ export function SchedulingCalendar() {
           <select
             value={professional}
             onChange={(e) => setProfessional(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500 bg-white"
+            className="text-xs border border-gray-200 rounded-xl px-2 py-1.5 focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">Todos profissionais</option>
             {PROFESSIONALS.map((p) => (
@@ -240,7 +240,7 @@ export function SchedulingCalendar() {
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" onClick={handlePrevious}>
@@ -256,16 +256,16 @@ export function SchedulingCalendar() {
 
         <div className="flex items-center gap-3">
           {/* View mode toggle */}
-          <div className="flex rounded-lg border p-1">
+          <div className="flex rounded-xl bg-gray-100 p-1">
             {(["day", "week", "month"] as ViewMode[]).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={cn(
-                  "px-3 py-1 text-sm rounded-md transition-colors",
+                  "px-3 py-1 text-sm rounded-lg transition-all",
                   viewMode === mode
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-white text-gray-900 shadow-sm font-medium"
+                    : "text-gray-500 hover:text-gray-700"
                 )}
               >
                 {{ day: "Dia", week: "Semana", month: "Mês" }[mode]}

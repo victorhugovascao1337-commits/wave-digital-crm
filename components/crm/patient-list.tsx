@@ -25,14 +25,7 @@ interface VisitInfo {
   nextVisitTime: string | null
 }
 
-const avatarColors = [
-  "bg-blue-600",
-  "bg-violet-600",
-  "bg-pink-500",
-  "bg-orange-500",
-  "bg-teal-500",
-  "bg-indigo-500",
-]
+// Avatar colors now handled automatically by avatar.tsx auto-gradient system
 
 const ITEMS_PER_PAGE = 10
 
@@ -83,9 +76,6 @@ export function PatientList({ patients, onRefresh }: PatientListProps) {
 
   const getInitials = (name: string) =>
     name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-
-  const getAvatarColor = (name: string) =>
-    avatarColors[name.charCodeAt(0) % avatarColors.length]
 
   const getStatusLabel = (status: string) => {
     const map: Record<string, string> = { active: "Ativo", Ativo: "Ativo", pending: "Pendente", Pendente: "Pendente", inactive: "Inativo", Inativo: "Inativo" }
@@ -168,33 +158,33 @@ export function PatientList({ patients, onRefresh }: PatientListProps) {
 
   return (
     <>
-      <section className="bg-accent/30 p-1 rounded-[1.5rem]">
-        <div className="bg-card rounded-[1.3rem] overflow-hidden shadow-sm">
+      <section className="bg-gradient-to-br from-gray-50/80 to-gray-100/50 p-1 rounded-2xl">
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border">
-                <th className="px-8 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+              <tr className="border-b border-gray-100 bg-gray-50/60">
+                <th className="px-8 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                   Paciente
                 </th>
-                <th className="px-5 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                <th className="px-5 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                   CPF / Identidade
                 </th>
-                <th className="px-5 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                <th className="px-5 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                   Status
                 </th>
-                <th className="px-5 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                <th className="px-5 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                   Última Visita
                 </th>
-                <th className="px-5 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                <th className="px-5 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                   Próxima Visita
                 </th>
-                <th className="px-5 py-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                <th className="px-5 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                   Contato
                 </th>
-                <th className="px-6 py-5 text-right"></th>
+                <th className="px-6 py-4 text-right"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-gray-50">
               {paginatedPatients.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-16 text-muted-foreground">
@@ -210,13 +200,13 @@ export function PatientList({ patients, onRefresh }: PatientListProps) {
                     <tr
                       key={patient.id}
                       onClick={() => handleViewDetails(patient.id)}
-                      className="hover:bg-primary/[0.03] transition-colors group cursor-pointer"
+                      className="hover:bg-gray-50/80 transition-colors group cursor-pointer"
                     >
                       {/* Patient */}
                       <td className="px-8 py-4">
                         <div className="flex items-center gap-4">
-                          <Avatar className={cn("h-12 w-12 flex-shrink-0", getAvatarColor(patient.name))}>
-                            <AvatarFallback className={cn(getAvatarColor(patient.name), "text-white text-sm font-semibold")}>
+                          <Avatar className="h-12 w-12 flex-shrink-0">
+                            <AvatarFallback className="text-sm">
                               {getInitials(patient.name)}
                             </AvatarFallback>
                           </Avatar>
@@ -325,7 +315,7 @@ export function PatientList({ patients, onRefresh }: PatientListProps) {
 
           {/* Pagination */}
           {patients.length > 0 && (
-            <div className="px-8 py-5 border-t border-border flex items-center justify-between">
+            <div className="px-8 py-5 border-t border-gray-100 flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 Mostrando{" "}
                 <span className="font-semibold text-foreground">

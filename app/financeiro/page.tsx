@@ -226,13 +226,13 @@ export default function FinanceiroPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           {[
-            { label: "Receitas (Pago)", value: totalReceitas, icon: ArrowUpCircle, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200" },
-            { label: "Pendente", value: totalPendente, icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-            { label: "Atrasado", value: totalAtrasado, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
-            { label: "Despesas", value: totalDespesas, icon: ArrowDownCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
-            { label: "Saldo", value: saldo, icon: Wallet, color: saldo >= 0 ? "text-emerald-600" : "text-red-600", bg: saldo >= 0 ? "bg-emerald-50" : "bg-red-50", border: saldo >= 0 ? "border-emerald-200" : "border-red-200" },
+            { label: "Receitas (Pago)", value: totalReceitas, icon: ArrowUpCircle, color: "text-emerald-600", gradient: "bg-gradient-to-br from-emerald-50 to-emerald-100" },
+            { label: "Pendente", value: totalPendente, icon: Clock, color: "text-amber-600", gradient: "bg-gradient-to-br from-amber-50 to-amber-100" },
+            { label: "Atrasado", value: totalAtrasado, icon: AlertTriangle, color: "text-red-600", gradient: "bg-gradient-to-br from-red-50 to-red-100" },
+            { label: "Despesas", value: totalDespesas, icon: ArrowDownCircle, color: "text-red-600", gradient: "bg-gradient-to-br from-red-50 to-rose-100" },
+            { label: "Saldo", value: saldo, icon: Wallet, color: saldo >= 0 ? "text-emerald-600" : "text-red-600", gradient: saldo >= 0 ? "bg-gradient-to-br from-emerald-50 to-emerald-100" : "bg-gradient-to-br from-red-50 to-red-100" },
           ].map((card, i) => (
-            <div key={i} className={`${card.bg} border ${card.border} rounded-2xl p-4`}>
+            <div key={i} className={`${card.gradient} rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow`}>
               <div className="flex items-center gap-2 mb-2">
                 <card.icon className={`h-4 w-4 ${card.color}`} />
                 <span className="text-xs font-medium text-gray-500">{card.label}</span>
@@ -266,7 +266,7 @@ export default function FinanceiroPage() {
             {tab === "overview" && (
               <div className="grid lg:grid-cols-2 gap-6">
                 {/* Recent Payments */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <ArrowUpCircle className="h-5 w-5 text-emerald-500" />
                     Últimas Receitas
@@ -305,7 +305,7 @@ export default function FinanceiroPage() {
                 </div>
 
                 {/* Recent Expenses */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <ArrowDownCircle className="h-5 w-5 text-red-500" />
                     Últimas Despesas
@@ -333,7 +333,7 @@ export default function FinanceiroPage() {
                 </div>
 
                 {/* Payment Methods Breakdown */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 lg:col-span-2">
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 lg:col-span-2 shadow-sm">
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <CreditCard className="h-5 w-5 text-indigo-500" />
                     Receitas por Forma de Pagamento
@@ -387,10 +387,10 @@ export default function FinanceiroPage() {
                     <p className="text-gray-400">Nenhuma receita encontrada</p>
                   </div>
                 ) : (
-                  <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                  <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-gray-50/80 border-b border-gray-100">
                           <tr>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">Paciente</th>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">Descrição</th>
@@ -457,10 +457,10 @@ export default function FinanceiroPage() {
                     <p className="text-gray-400">Nenhuma despesa encontrada</p>
                   </div>
                 ) : (
-                  <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                  <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-gray-50/80 border-b border-gray-100">
                           <tr>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">Descrição</th>
                             <th className="text-left px-4 py-3 font-medium text-gray-500">Categoria</th>
@@ -506,7 +506,7 @@ export default function FinanceiroPage() {
             {tab === "fluxo" && (
               <div className="space-y-6">
                 {/* Visual bar chart */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                   <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-indigo-500" />
                     Fluxo de Caixa Semanal — <span className="capitalize">{periodLabel}</span>
@@ -555,17 +555,17 @@ export default function FinanceiroPage() {
 
                 {/* Monthly totals summary */}
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-center">
+                  <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-5 text-center shadow-sm">
                     <TrendingUp className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
                     <p className="text-xs text-emerald-600 font-medium mb-1">Total Entradas</p>
                     <p className="text-xl font-bold text-emerald-700">{formatCurrency(totalReceitas)}</p>
                   </div>
-                  <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-center">
+                  <div className="bg-gradient-to-br from-red-50 to-rose-100 rounded-2xl p-5 text-center shadow-sm">
                     <TrendingDown className="h-8 w-8 text-red-500 mx-auto mb-2" />
                     <p className="text-xs text-red-600 font-medium mb-1">Total Saídas</p>
                     <p className="text-xl font-bold text-red-700">{formatCurrency(totalDespesas)}</p>
                   </div>
-                  <div className={`${saldo >= 0 ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"} border rounded-2xl p-5 text-center`}>
+                  <div className={`${saldo >= 0 ? "bg-gradient-to-br from-emerald-50 to-emerald-100" : "bg-gradient-to-br from-red-50 to-rose-100"} rounded-2xl p-5 text-center shadow-sm`}>
                     <Wallet className={`h-8 w-8 ${saldo >= 0 ? "text-emerald-500" : "text-red-500"} mx-auto mb-2`} />
                     <p className={`text-xs ${saldo >= 0 ? "text-emerald-600" : "text-red-600"} font-medium mb-1`}>Resultado</p>
                     <p className={`text-xl font-bold ${saldo >= 0 ? "text-emerald-700" : "text-red-700"}`}>{formatCurrency(saldo)}</p>
