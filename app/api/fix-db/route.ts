@@ -1,127 +1,70 @@
+import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 
-// ONE-TIME endpoint to fix the appointments CHECK constraint
-// Deploy, access via browser GET, then delete this file
+// Probe which status values the DB constraint allows
+// Uses service role to bypass RLS
 
-const ALTER_SQL = `
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'appointments_status_check'
-  ) THEN
-    ALTER TABLE public.appointments DROP CONSTRAINT appointments_status_check;
-  END IF;
-  ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check
-    CHECK (status IN (
-      'PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO',
-      'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'
-    ));
-END $$;
-`
-
-function getProjectRef(): string | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-  const match = url.match(/https:\/\/([^.]+)\.supabase\.co/)
-  return match ? match[1] : null
-}
-
-async function tryPoolerJwt(): Promise<{ success: boolean; method?: string; error?: string }> {
-  const ref = getProjectRef()
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!ref || !serviceKey) return { success: false, error: "Missing ref or service key" }
-
-  // Disable TLS verification for this request (Supabase pooler uses self-signed certs)
-  const originalTls = process.env.NODE_TLS_REJECT_UNAUTHORIZED
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
-  const regions = ["us-east-1", "sa-east-1", "us-west-1", "eu-west-1"]
-  const configs = [
-    // Session mode (port 5432) - needed for DDL/DO blocks
-    ...regions.map(r => ({ host: `aws-0-${r}.pooler.supabase.com`, port: 5432 })),
-    // Transaction mode (port 6543)
-    ...regions.map(r => ({ host: `aws-0-${r}.pooler.supabase.com`, port: 6543 })),
-  ]
-
-  const errors: string[] = []
-
-  try {
-    const { Pool } = await import("pg")
-
-    for (const { host, port } of configs) {
-      try {
-        const pool = new Pool({
-          host,
-          port,
-          database: "postgres",
-          user: `postgres.${ref}`,
-          password: serviceKey,
-          ssl: false,
-          connectionTimeoutMillis: 8000,
-        })
-        await pool.query(ALTER_SQL)
-        await pool.end()
-        return { success: true, method: `pooler ${host}:${port}` }
-      } catch (e: any) {
-        errors.push(`${host}:${port} → ${e.message?.substring(0, 100)}`)
-        continue
-      }
-    }
-
-    // Also try with ssl but rejectUnauthorized false
-    for (const { host, port } of configs.slice(0, 4)) {
-      try {
-        const pool = new Pool({
-          host,
-          port,
-          database: "postgres",
-          user: `postgres.${ref}`,
-          password: serviceKey,
-          ssl: { rejectUnauthorized: false },
-          connectionTimeoutMillis: 8000,
-        })
-        await pool.query(ALTER_SQL)
-        await pool.end()
-        return { success: true, method: `pooler-ssl ${host}:${port}` }
-      } catch (e: any) {
-        errors.push(`ssl ${host}:${port} → ${e.message?.substring(0, 100)}`)
-        continue
-      }
-    }
-  } finally {
-    // Restore original TLS setting
-    if (originalTls === undefined) {
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
-    } else {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTls
-    }
-  }
-
-  return { success: false, error: errors.join(" | ") }
-}
+const TEST_STATUSES = [
+  "PENDENTE", "CONFIRMADO", "CONCLUÍDO", "FALTOU", "CANCELADO",
+  "CHEGOU", "EM ATENDIMENTO", "BLOQUEADO",
+]
 
 export async function GET() {
-  const envCheck = {
-    NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    projectRef: getProjectRef(),
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) {
+    return NextResponse.json({ error: "Missing env vars" }, { status: 500 })
   }
 
-  const result = await tryPoolerJwt()
+  const supabase = createClient(url, key)
 
-  if (result.success) {
+  // Step 1: Get a real appointment to use as test subject
+  const { data: appt, error: fetchErr } = await supabase
+    .from("appointments")
+    .select("id, status")
+    .limit(1)
+    .single()
+
+  if (fetchErr || !appt) {
     return NextResponse.json({
-      success: true,
-      message: "✅ Constraint corrigida com sucesso! Agora os status CHEGOU, EM ATENDIMENTO e BLOQUEADO vão funcionar.",
-      method: result.method,
-      envCheck,
-    })
+      error: "Não encontrou agendamento para testar",
+      detail: fetchErr?.message,
+    }, { status: 500 })
   }
+
+  const originalStatus = appt.status
+  const results: Record<string, string> = {}
+
+  // Step 2: Try each status
+  for (const testStatus of TEST_STATUSES) {
+    const { error } = await supabase
+      .from("appointments")
+      .update({ status: testStatus })
+      .eq("id", appt.id)
+
+    results[testStatus] = error ? `❌ ${error.message?.substring(0, 80)}` : "✅ OK"
+  }
+
+  // Step 3: Restore original status
+  await supabase
+    .from("appointments")
+    .update({ status: originalStatus })
+    .eq("id", appt.id)
+
+  const allowed = Object.entries(results).filter(([, v]) => v.includes("OK")).map(([k]) => k)
+  const blocked = Object.entries(results).filter(([, v]) => v.includes("❌")).map(([k]) => k)
 
   return NextResponse.json({
-    success: false,
-    message: "❌ Não funcionou. Detalhes dos erros abaixo.",
-    error: result.error,
-    envCheck,
-    sql: "ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check; ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));",
-  }, { status: 500 })
+    message: "Resultado do teste de status",
+    originalStatus,
+    appointmentId: appt.id,
+    results,
+    summary: {
+      allowed,
+      blocked,
+    },
+    fix: blocked.length > 0
+      ? "Status bloqueados pela constraint. Execute este SQL no Supabase SQL Editor do projeto fizhhazqanagnfkqsgtu: ALTER TABLE public.appointments DROP CONSTRAINT IF EXISTS appointments_status_check; ALTER TABLE public.appointments ADD CONSTRAINT appointments_status_check CHECK (status IN ('PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'FALTOU', 'CANCELADO', 'CHEGOU', 'EM ATENDIMENTO', 'BLOQUEADO'));"
+      : "✅ Todos os status estão funcionando!",
+  })
 }
