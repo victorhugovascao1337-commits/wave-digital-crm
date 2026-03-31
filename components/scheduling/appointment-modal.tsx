@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { X, Trash2, Clock, User, CalendarDays, Repeat, Lock, DollarSign, FileText, Stethoscope } from "lucide-react"
+import { X, Trash2, Clock, User, CalendarDays, Repeat, Lock, DollarSign, FileText, Stethoscope, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { Appointment, AppointmentFormData, AppointmentStatus, Patient } from "@/lib/types"
@@ -28,6 +28,15 @@ interface AppointmentModalProps {
   isLoading: boolean
   error: string | null
   blockMode?: boolean
+}
+
+const PAYMENT_METHODS: Record<string, string> = {
+  pix: "PIX",
+  credit_card: "Cartão Crédito",
+  debit_card: "Cartão Débito",
+  cash: "Dinheiro",
+  bank_transfer: "Transferência",
+  boleto: "Boleto",
 }
 
 export function AppointmentModal({
@@ -59,6 +68,12 @@ export function AppointmentModal({
   const [showPatientDropdown, setShowPatientDropdown] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
+  // Payment state
+  const [payment, setPayment] = useState<any>(null)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  const [showPaymentMethod, setShowPaymentMethod] = useState(false)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("pix")
+
   // All services flattened
   const allServices = useMemo(() => {
     const all: string[] = []
@@ -67,6 +82,25 @@ export function AppointmentModal({
     })
     return all.sort()
   }, [])
+
+  // Fetch payment associated with this appointment
+  useEffect(() => {
+    if (!open || !appointment?.id) {
+      setPayment(null)
+      return
+    }
+
+    fetch(`/api/payments?patient_id=${appointment.patient_id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          // Find payment linked to this appointment
+          const linked = data.find((p: any) => p.appointment_id === appointment.id)
+          setPayment(linked || null)
+        }
+      })
+      .catch(() => setPayment(null))
+  }, [open, appointment?.id, appointment?.patient_id])
 
   // Reset form on open
   useEffect(() => {
@@ -85,11 +119,12 @@ export function AppointmentModal({
       setIsBlock(appointment.is_block || false)
       setBlockReason(appointment.block_reason || "")
       setPatientSearch("")
+      setShowPaymentMethod(false)
 
       // Set patient search text
       if (appointment.patient) {
         const p = appointment.patient as any
-        setPatientSearch(p.full_name || p.name || "")
+        setPatientSearch(p.name || p.full_name || "")
       }
     } else {
       setPatientId("")
@@ -104,6 +139,7 @@ export function AppointmentModal({
       setIsBlock(blockMode)
       setBlockReason("")
       setPatientSearch("")
+      setShowPaymentMethod(false)
     }
     setConfirmDelete(false)
     setShowPatientDropdown(false)
@@ -114,7 +150,7 @@ export function AppointmentModal({
     if (!patientSearch.trim()) return patients.slice(0, 20)
     const term = patientSearch.toLowerCase()
     return patients.filter((p) => {
-      const name = ((p as any).full_name || p.name || "").toLowerCase()
+      const name = ((p as any).name || (p as any).full_name || "").toLowerCase()
       const phone = (p.phone || "").toLowerCase()
       return name.includes(term) || phone.includes(term)
     }).slice(0, 20)
@@ -138,6 +174,35 @@ export function AppointmentModal({
       is_block: isBlock,
       block_reason: isBlock ? blockReason : undefined,
     })
+  }
+
+  const handleConfirmPayment = async () => {
+    if (!payment) return
+    setPaymentLoading(true)
+    try {
+      const today = new Date().toISOString().split("T")[0]
+      const res = await fetch("/api/payments", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: payment.id,
+          patient_id: payment.patient_id,
+          description: payment.description,
+          amount: payment.amount,
+          status: "paid",
+          payment_method: selectedPaymentMethod,
+          payment_date: today,
+          due_date: payment.due_date,
+        }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setPayment(updated)
+        setShowPaymentMethod(false)
+      }
+    } finally {
+      setPaymentLoading(false)
+    }
   }
 
   // Valid next statuses for current appointment
@@ -211,6 +276,76 @@ export function AppointmentModal({
           </div>
         )}
 
+        {/* Payment bar for existing appointments with value */}
+        {appointment && !isBlock && payment && (
+          <div className={cn(
+            "px-6 py-3 border-b flex items-center justify-between",
+            payment.status === "paid" ? "bg-emerald-50" : "bg-amber-50"
+          )}>
+            <div className="flex items-center gap-2">
+              <DollarSign className={cn("h-4 w-4", payment.status === "paid" ? "text-emerald-600" : "text-amber-600")} />
+              <span className="text-xs font-medium text-gray-600">Pagamento:</span>
+              <span className={cn(
+                "text-xs font-bold",
+                payment.status === "paid" ? "text-emerald-700" : "text-amber-700"
+              )}>
+                R$ {Number(payment.amount).toFixed(2).replace(".", ",")}
+              </span>
+              <span className={cn(
+                "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                payment.status === "paid"
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-amber-100 text-amber-700"
+              )}>
+                {payment.status === "paid" ? "PAGO" : payment.status === "overdue" ? "ATRASADO" : "PENDENTE"}
+              </span>
+              {payment.status === "paid" && payment.payment_method && (
+                <span className="text-[10px] text-emerald-600">
+                  via {PAYMENT_METHODS[payment.payment_method] || payment.payment_method}
+                </span>
+              )}
+            </div>
+
+            {payment.status !== "paid" && !showPaymentMethod && (
+              <button
+                onClick={() => setShowPaymentMethod(true)}
+                disabled={paymentLoading}
+                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Confirmar Pagamento
+              </button>
+            )}
+
+            {payment.status !== "paid" && showPaymentMethod && (
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedPaymentMethod}
+                  onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                  className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-emerald-500"
+                >
+                  {Object.entries(PAYMENT_METHODS).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleConfirmPayment}
+                  disabled={paymentLoading}
+                  className="px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-colors"
+                >
+                  {paymentLoading ? "..." : "Confirmar"}
+                </button>
+                <button
+                  onClick={() => setShowPaymentMethod(false)}
+                  className="px-2 py-1.5 text-gray-400 hover:text-gray-600 text-xs"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           {/* Error */}
@@ -274,7 +409,7 @@ export function AppointmentModal({
               {showPatientDropdown && filteredPatients.length > 0 && (
                 <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                   {filteredPatients.map((p) => {
-                    const name = (p as any).full_name || p.name || "—"
+                    const name = (p as any).name || (p as any).full_name || "—"
                     return (
                       <button
                         key={p.id}

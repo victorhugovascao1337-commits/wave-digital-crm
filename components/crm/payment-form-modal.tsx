@@ -5,7 +5,7 @@ import { X, Search, DollarSign } from "lucide-react"
 
 interface PatientOption {
   id: string
-  full_name: string
+  name: string
   cpf: string | null
 }
 
@@ -36,7 +36,7 @@ export function PaymentFormModal({ open, onClose, onSaved, editData }: PaymentFo
     if (editData) {
       setForm({
         patient_id: editData.patient_id || "",
-        patient_name: editData.patient?.full_name || "",
+        patient_name: editData.patient?.name || editData.patient?.full_name || "",
         description: editData.description || "",
         amount: editData.amount?.toString() || "",
         status: editData.status || "pending",
@@ -138,20 +138,23 @@ export function PaymentFormModal({ open, onClose, onSaved, editData }: PaymentFo
                 </div>
                 {showPatientDropdown && patients.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-xl shadow-lg max-h-40 overflow-y-auto">
-                    {patients.map((p) => (
-                      <button
-                        key={p.id}
-                        className="w-full text-left px-4 py-2.5 hover:bg-emerald-50 text-sm"
-                        onClick={() => {
-                          setForm({ ...form, patient_id: p.id, patient_name: (p as any).full_name || (p as any).name || "" })
-                          setShowPatientDropdown(false)
-                          setPatientSearch("")
-                        }}
-                      >
-                        <span className="font-medium">{(p as any).full_name || (p as any).name}</span>
-                        {p.cpf && <span className="text-gray-400 ml-2">CPF: {p.cpf}</span>}
-                      </button>
-                    ))}
+                    {patients.map((p) => {
+                      const pName = (p as any).name || (p as any).full_name || "—"
+                      return (
+                        <button
+                          key={p.id}
+                          className="w-full text-left px-4 py-2.5 hover:bg-emerald-50 text-sm"
+                          onClick={() => {
+                            setForm({ ...form, patient_id: p.id, patient_name: pName })
+                            setShowPatientDropdown(false)
+                            setPatientSearch("")
+                          }}
+                        >
+                          <span className="font-medium">{pName}</span>
+                          {p.cpf && <span className="text-gray-400 ml-2">CPF: {p.cpf}</span>}
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
               </>

@@ -94,12 +94,15 @@ export default function FinanceiroPage() {
   const totalDespesas = useMemo(() => expenses.reduce((s, e) => s + Number(e.amount || 0), 0), [expenses])
   const saldo = totalReceitas - totalDespesas
 
+  // Helper to get patient name (supports both name and full_name for backwards compat)
+  const getPatientName = (p: any) => p?.patient?.name || p?.patient?.full_name || "—"
+
   // Filtered lists
   const filteredPayments = useMemo(() => {
     let list = payments
     if (searchPayment) {
       const q = searchPayment.toLowerCase()
-      list = list.filter((p) => (p.patient?.full_name || "").toLowerCase().includes(q) || (p.description || "").toLowerCase().includes(q))
+      list = list.filter((p) => getPatientName(p).toLowerCase().includes(q) || (p.description || "").toLowerCase().includes(q))
     }
     if (filterStatus) list = list.filter((p) => p.status === filterStatus)
     return list
@@ -153,6 +156,26 @@ export default function FinanceiroPage() {
     fetchData()
   }
 
+  // Quick confirm payment
+  const handleQuickConfirmPayment = async (payment: any) => {
+    const today = new Date().toISOString().split("T")[0]
+    await fetch("/api/payments", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: payment.id,
+        patient_id: payment.patient_id,
+        description: payment.description,
+        amount: payment.amount,
+        status: "paid",
+        payment_method: payment.payment_method || "pix",
+        payment_date: today,
+        due_date: payment.due_date,
+      }),
+    })
+    fetchData()
+  }
+
   const formatCurrency = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 
@@ -174,7 +197,7 @@ export default function FinanceiroPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
               <Wallet className="h-7 w-7 text-emerald-600" />
               Financeiro
             </h1>
@@ -256,15 +279,26 @@ export default function FinanceiroPage() {
                     <div className="space-y-3">
                       {payments.slice(0, 5).map((p) => (
                         <div key={p.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{p.patient?.full_name || "—"}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">{getPatientName(p)}</p>
                             <p className="text-xs text-gray-400">{p.description || "Pagamento"}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold text-emerald-600">{formatCurrency(Number(p.amount))}</p>
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${STATUS_LABELS[p.status]?.bg || ""} ${STATUS_LABELS[p.status]?.color || ""}`}>
-                              {STATUS_LABELS[p.status]?.label || p.status}
-                            </span>
+                          <div className="text-right flex items-center gap-2">
+                            <div>
+                              <p className="text-sm font-bold text-emerald-600">{formatCurrency(Number(p.amount))}</p>
+                              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${STATUS_LABELS[p.status]?.bg || ""} ${STATUS_LABELS[p.status]?.color || ""}`}>
+                                {STATUS_LABELS[p.status]?.label || p.status}
+                              </span>
+                            </div>
+                            {p.status === "pending" && (
+                              <button
+                                onClick={() => handleQuickConfirmPayment(p)}
+                                className="p-1.5 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                                title="Confirmar pagamento"
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -372,7 +406,7 @@ export default function FinanceiroPage() {
                         <tbody className="divide-y divide-gray-50">
                           {filteredPayments.map((p) => (
                             <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-4 py-3 font-medium text-gray-900">{p.patient?.full_name || "—"}</td>
+                              <td className="px-4 py-3 font-medium text-gray-900">{getPatientName(p)}</td>
                               <td className="px-4 py-3 text-gray-600">{p.description || "—"}</td>
                               <td className="px-4 py-3 font-bold text-emerald-600">{formatCurrency(Number(p.amount))}</td>
                               <td className="px-4 py-3 text-gray-600">{PAYMENT_METHODS[p.payment_method] || "—"}</td>
@@ -382,9 +416,18 @@ export default function FinanceiroPage() {
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-gray-500">{p.due_date ? new Date(p.due_date).toLocaleDateString("pt-BR") : "—"}</td>
-                              <td className="px-4 py-3 text-right">
+                              <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
+                                {p.status === "pending" && (
+                                  <button
+                                    onClick={() => handleQuickConfirmPayment(p)}
+                                    className="p-1.5 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                                    title="Confirmar pagamento"
+                                  >
+                                    <CheckCircle2 className="h-4 w-4" />
+                                  </button>
+                                )}
                                 <button onClick={() => { setEditPayment(p); setPaymentModal(true) }} className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"><Edit2 className="h-4 w-4" /></button>
-                                <button onClick={() => handleDeletePayment(p.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg ml-1"><Trash2 className="h-4 w-4" /></button>
+                                <button onClick={() => handleDeletePayment(p.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="h-4 w-4" /></button>
                               </td>
                             </tr>
                           ))}
