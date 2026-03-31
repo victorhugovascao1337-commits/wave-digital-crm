@@ -35,19 +35,22 @@ export async function POST(request: Request) {
     const clinicId = await getClinicId()
     const body = await request.json()
 
+    // Build insert object with only valid fields
+    const insertData: Record<string, unknown> = {
+      clinic_id: clinicId,
+      patient_id: body.patient_id,
+      amount: body.amount,
+      status: body.status || "pending",
+    }
+    if (body.appointment_id) insertData.appointment_id = body.appointment_id
+    if (body.description) insertData.description = body.description
+    if (body.payment_method) insertData.payment_method = body.payment_method
+    if (body.payment_date) insertData.payment_date = body.payment_date
+    if (body.due_date) insertData.due_date = body.due_date
+
     const { data, error } = await supabase
       .from("payments")
-      .insert([{
-        clinic_id: clinicId,
-        patient_id: body.patient_id,
-        appointment_id: body.appointment_id || null,
-        description: body.description || null,
-        amount: body.amount,
-        status: body.status || "pending",
-        payment_method: body.payment_method || null,
-        payment_date: body.payment_date || null,
-        due_date: body.due_date || null,
-      }])
+      .insert([insertData])
       .select("*, patient:patients(id, name, cpf, phone, email)")
       .single()
 
@@ -65,18 +68,20 @@ export async function PUT(request: Request) {
     const clinicId = await getClinicId()
     const body = await request.json()
 
+    // Build update object with only provided fields (avoids sending columns that may not exist)
+    const updateData: Record<string, unknown> = {}
+    if (body.patient_id !== undefined) updateData.patient_id = body.patient_id
+    if (body.description !== undefined) updateData.description = body.description
+    if (body.amount !== undefined) updateData.amount = body.amount
+    if (body.status !== undefined) updateData.status = body.status
+    if (body.payment_method !== undefined) updateData.payment_method = body.payment_method
+    if (body.payment_date !== undefined) updateData.payment_date = body.payment_date
+    if (body.due_date !== undefined) updateData.due_date = body.due_date
+    updateData.updated_at = new Date().toISOString()
+
     const { data, error } = await supabase
       .from("payments")
-      .update({
-        patient_id: body.patient_id,
-        description: body.description,
-        amount: body.amount,
-        status: body.status,
-        payment_method: body.payment_method,
-        payment_date: body.payment_date,
-        due_date: body.due_date,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", body.id)
       .eq("clinic_id", clinicId)
       .select("*, patient:patients(id, name, cpf, phone, email)")

@@ -191,13 +191,8 @@ export function AppointmentModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: payment.id,
-          patient_id: payment.patient_id,
-          description: payment.description,
-          amount: payment.amount,
           status: "paid",
           payment_method: selectedPaymentMethod,
-          payment_date: today,
-          due_date: payment.due_date,
         }),
       })
       if (res.ok) {
@@ -219,17 +214,17 @@ export function AppointmentModal({
   }
 
   // DB constraint only allows: PENDENTE, CONFIRMADO, CONCLUÍDO, FALTOU, CANCELADO
-  // Override STATUS_FLOW to only use allowed transitions
+  // Override STATUS_FLOW with allowed transitions (including reverse)
   const SAFE_STATUS_FLOW: Record<string, string[]> = {
     pending: ["confirmed", "cancelled"],
     confirmed: ["completed", "missed", "cancelled"],
-    completed: [],
-    missed: [],
-    cancelled: [],
+    completed: ["confirmed"],
+    missed: ["confirmed", "pending"],
+    cancelled: ["pending"],
     // Fallback for any legacy statuses
-    arrived: ["completed", "missed"],
-    in_progress: ["completed"],
-    blocked: [],
+    arrived: ["completed", "missed", "confirmed"],
+    in_progress: ["completed", "confirmed"],
+    blocked: ["pending"],
   }
   const nextStatuses = appointment
     ? (SAFE_STATUS_FLOW[appointment.status] || STATUS_FLOW[appointment.status] || [])
