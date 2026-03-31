@@ -21,17 +21,32 @@ async function getClinicId(): Promise<string | null> {
   return _clinicId
 }
 
+// DB uses English status values (check constraint: appointments_status_check)
+// Map app status to DB status (identity — DB uses English lowercase)
 const statusToDb: Record<string, string> = {
-  confirmed: "CONFIRMADO",
-  pending: "PENDENTE",
-  completed: "CONCLUÍDO",
-  missed: "FALTOU",
-  cancelled: "CANCELADO",
-  arrived: "CHEGOU",
-  in_progress: "EM ATENDIMENTO",
+  confirmed: "confirmed",
+  pending: "pending",
+  completed: "completed",
+  missed: "missed",
+  cancelled: "cancelled",
+  arrived: "arrived",
+  in_progress: "in_progress",
+  blocked: "blocked",
 }
 
+// Map DB status to app status (handles both English and legacy Portuguese)
 const statusFromDb: Record<string, string> = {
+  // English (current DB format)
+  confirmed: "confirmed",
+  pending: "pending",
+  completed: "completed",
+  missed: "missed",
+  cancelled: "cancelled",
+  arrived: "arrived",
+  in_progress: "in_progress",
+  blocked: "blocked",
+  scheduled: "pending",
+  // Legacy Portuguese (backwards compat)
   CONFIRMADO: "confirmed",
   PENDENTE: "pending",
   "CONCLUÍDO": "completed",
@@ -39,6 +54,7 @@ const statusFromDb: Record<string, string> = {
   CANCELADO: "cancelled",
   CHEGOU: "arrived",
   "EM ATENDIMENTO": "in_progress",
+  BLOQUEADO: "blocked",
 }
 
 function mapAppointmentFromDb(apt: Record<string, unknown>): Appointment {
@@ -212,7 +228,7 @@ export async function checkTimeConflict(
     .from("appointments")
     .select("id, start_time, end_time")
     .eq("date", date)
-    .neq("status", "CANCELADO")
+    .neq("status", "cancelled")
   if (excludeId) query = query.neq("id", excludeId)
   const { data: existing, error } = await query
   if (error) throw error
@@ -263,7 +279,7 @@ export async function createAppointment(data: AppointmentFormData): Promise<Appo
       service: data.is_block ? (data.block_reason || "Bloqueio") : data.service,
       value: data.is_block ? 0 : (data.price || 0),
       notes: data.notes || null,
-      status: data.is_block ? "BLOQUEADO" : "PENDENTE",
+      status: data.is_block ? "blocked" : "pending",
       professional: data.professional || null,
       clinic_id: clinicId,
     }

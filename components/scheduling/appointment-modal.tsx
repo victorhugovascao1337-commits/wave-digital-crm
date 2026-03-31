@@ -292,50 +292,54 @@ export function AppointmentModal({
         {/* Payment bar for existing appointments with value */}
         {appointment && !isBlock && payment && (
           <div className={cn(
-            "px-6 py-3 border-b flex items-center justify-between",
-            payment.status === "paid" ? "bg-emerald-50" : "bg-amber-50"
+            "px-6 border-b",
+            payment.status === "paid" ? "bg-emerald-50 py-3" : "bg-amber-50 py-3"
           )}>
-            <div className="flex items-center gap-2">
-              <DollarSign className={cn("h-4 w-4", payment.status === "paid" ? "text-emerald-600" : "text-amber-600")} />
-              <span className="text-xs font-medium text-gray-600">Pagamento:</span>
-              <span className={cn(
-                "text-xs font-bold",
-                payment.status === "paid" ? "text-emerald-700" : "text-amber-700"
-              )}>
-                R$ {Number(payment.amount).toFixed(2).replace(".", ",")}
-              </span>
-              <span className={cn(
-                "text-[10px] font-bold px-2 py-0.5 rounded-full",
-                payment.status === "paid"
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-amber-100 text-amber-700"
-              )}>
-                {payment.status === "paid" ? "PAGO" : payment.status === "overdue" ? "ATRASADO" : "PENDENTE"}
-              </span>
-              {payment.status === "paid" && payment.payment_method && (
-                <span className="text-[10px] text-emerald-600">
-                  via {PAYMENT_METHODS[payment.payment_method] || payment.payment_method}
+            {/* Payment info row */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DollarSign className={cn("h-4 w-4", payment.status === "paid" ? "text-emerald-600" : "text-amber-600")} />
+                <span className="text-xs font-medium text-gray-600">Pagamento:</span>
+                <span className={cn(
+                  "text-sm font-bold",
+                  payment.status === "paid" ? "text-emerald-700" : "text-amber-700"
+                )}>
+                  R$ {Number(payment.amount).toFixed(2).replace(".", ",")}
                 </span>
+                <span className={cn(
+                  "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                  payment.status === "paid"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-700"
+                )}>
+                  {payment.status === "paid" ? "PAGO" : payment.status === "overdue" ? "ATRASADO" : "PENDENTE"}
+                </span>
+                {payment.status === "paid" && payment.payment_method && (
+                  <span className="text-[10px] text-emerald-600">
+                    via {PAYMENT_METHODS[payment.payment_method] || payment.payment_method}
+                  </span>
+                )}
+              </div>
+
+              {payment.status !== "paid" && !showPaymentMethod && (
+                <button
+                  onClick={() => setShowPaymentMethod(true)}
+                  disabled={paymentLoading}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-all shadow-sm hover:shadow-md"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Confirmar Pagamento
+                </button>
               )}
             </div>
 
-            {payment.status !== "paid" && !showPaymentMethod && (
-              <button
-                onClick={() => setShowPaymentMethod(true)}
-                disabled={paymentLoading}
-                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
-              >
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Confirmar Pagamento
-              </button>
-            )}
-
+            {/* Payment method selector — full width row below */}
             {payment.status !== "paid" && showPaymentMethod && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-amber-200">
                 <select
                   value={selectedPaymentMethod}
                   onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                  className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-emerald-500"
+                  className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 bg-white"
                 >
                   {Object.entries(PAYMENT_METHODS).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
@@ -344,13 +348,14 @@ export function AppointmentModal({
                 <button
                   onClick={handleConfirmPayment}
                   disabled={paymentLoading}
-                  className="px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-colors"
+                  className="flex items-center gap-1.5 px-5 py-2 bg-emerald-500 text-white text-sm font-bold rounded-lg hover:bg-emerald-600 transition-all shadow-sm"
                 >
-                  {paymentLoading ? "..." : "Confirmar"}
+                  <CheckCircle2 className="h-4 w-4" />
+                  {paymentLoading ? "Salvando..." : "Confirmar"}
                 </button>
                 <button
-                  onClick={() => setShowPaymentMethod(false)}
-                  className="px-2 py-1.5 text-gray-400 hover:text-gray-600 text-xs"
+                  onClick={() => { setShowPaymentMethod(false); setPaymentError(null) }}
+                  className="px-3 py-2 text-gray-400 hover:text-gray-600 text-sm rounded-lg hover:bg-white/50"
                 >
                   Cancelar
                 </button>
