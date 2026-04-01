@@ -517,7 +517,7 @@ export default function DashboardPage() {
                           </span>
                         ) : payment.status === "pending" ? (
                           <>
-                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markPaid(payment.id)}>
+                            <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0" onClick={() => markPaid(payment.id)}>
                               <Check className="h-3 w-3 mr-1" /> Marcar Pago
                             </Button>
                             <Button size="sm" variant="ghost" className="h-7 text-xs text-blue-600" onClick={() => handleWhatsApp(payment.phone, payment.patient, `Olá ${payment.patient}, você tem um pagamento pendente de ${fmt(payment.amount)} vencido em ${fmtDate(payment.dueDate)}.`)}>
